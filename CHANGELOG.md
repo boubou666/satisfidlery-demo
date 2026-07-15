@@ -18,6 +18,27 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.27.0] — 2026-07-16
+
+### Added
+
+- **Build a Miner Mk1 from the map's build radial — and rotate it.** The Miner Mk1 (once Mining
+  Automation is built) now appears in the build menu alongside buildings. It isn't dropped on open
+  ground: in placement mode its ghost **snaps onto the eligible ore node nearest the cursor** (a
+  node with no miner yet, inside the build ring), and the coach line reads _"Tap an ore node…"_. As
+  with buildings, **R** (or the Rotate button) turns it before you commit, so its belt **output
+  port faces the direction you want**. `Source` gains an `orientation` (mirroring `Building`;
+  `endpointOrientation` now reads it, so belts leave a rotated miner cleanly), and
+  `buildMinerMk1(sourceId, orientation)` is gated to the build radius so it can be placed from afar
+  (the on-node Sources-tab button still works too).
+
+  ![Miner Mk1 placement](docs/images/changelog/v0.27.0-miner-placement.png)
+
+### Changed
+
+- **Tripled the placement reach.** `BUILD_RADIUS` went from 80 m to **240 m**, so the build ring
+  covers far more ground and you can drop machines (and miners) across a wider area without walking.
+
 ## [0.26.0] — 2026-07-16
 
 ### Added
