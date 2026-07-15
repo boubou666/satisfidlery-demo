@@ -18,6 +18,106 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.21.7] — 2026-07-15
+
+### Changed
+
+- **The browser context menu is now disabled app-wide.** A right-click anywhere in the game
+  (map, HUB, inventory, header — everywhere) no longer pops the native menu (Back / Reload /
+  Save image / Inspect …); this is a game, not a document. Done with a single document-level
+  listener in \`main.tsx\`, replacing the map-only suppression added in 0.21.6 (the map's
+  right-click-doesn't-move-the-player behavior stays). (No screenshot: it's an interaction
+  change a still frame can't show.)
+
+## [0.21.6] — 2026-07-15
+
+### Changed
+
+- **Right-click does nothing on the map.** Previously a right-click on empty ground both
+  walked the player there *and* popped the browser's context menu. The map now only responds
+  to the primary button (left mouse / touch / pen) — right- and middle-clicks start no pan or
+  travel — and the browser context menu is suppressed over the map viewport. Left-click
+  tap-to-move is unchanged. (No screenshot: it's an interaction change a still frame can't show.)
+
+## [0.21.5] — 2026-07-15
+
+### Changed
+
+- **Player walks 4× faster.** \`MOVE_SPEED\` went from 20 to 80 world-units/second, so every
+  walk across the map — to a deposit, a building, the HUB, a scan result — takes a quarter of
+  the time it used to. Travel time scales straight off this one constant (\`time = distance /
+  MOVE_SPEED\`), so nothing else needed tuning. (No screenshot: a still frame can't show motion.)
+
+## [0.21.4] — 2026-07-15
+
+### Added
+
+- **Smelt Copper Ingots by hand at the HUB.** Copper smelting first becomes possible at the
+  **Field Fabrication** milestone (it's when copper scanning — and hand-crafting — come online),
+  so from that moment Copper Ingots join Iron Ingots as a HUB hand-craft: 1 Copper Ore → 1
+  Copper Ingot, 3s per cycle, no Smelter required. Nothing else changes — the Smelter still
+  smelts copper too; this just means you're no longer forced to build one before you can turn
+  your first copper ore into ingots (and feed the Wire recipe).
+
+![The HUB's Hand-Crafting panel now offers both an Iron Ingot and a Copper Ingot tile once Field Fabrication is built](docs/images/changelog/v0.21.4-copper-ingot-hub-craft.png)
+
+## [0.21.3] — 2026-07-15
+
+### Changed
+
+- **A clogged belt now packs completely full.** Previously stuck items sat at the belt's
+  wide throughput spacing (~160 m apart), so a jammed belt only ever held a handful. Items
+  now bunch up at their true physical size (~24 m), so a backed-up belt fills **end-to-end**
+  with items until there's genuinely no room left — and only then does the source machine
+  stop loading onto it. A freely-flowing belt is still sparse and still moves 30 items/min;
+  this only changes how densely items pile when they can't get off.
+
+![A conveyor belt packed end-to-end with 20 Iron Ingots, clogged because the destination Constructor's recipe won't accept them](docs/images/changelog/v0.21.3-belt-packs-full.png)
+
+## [0.21.2] — 2026-07-15
+
+### Changed
+
+- **Belts clog like Satisfactory when the item doesn't match the recipe.** An item now
+  enters a machine only if the machine's **currently-selected recipe** uses it. Deliver Iron
+  Ore to a Smelter set to make Copper Ingots and the ore no longer vanishes into the input —
+  it **gets stuck at the end of the belt**, and the items behind advance until they bump into
+  it and pile up. Switch the machine's recipe to one that uses the item and the clog clears
+  and flows in. (A belt full of stuck items also stops the source machine from loading more
+  onto it — backpressure all the way to the source.)
+- **Removing a belt gives back its cargo too.** Deleting a conveyor belt now refunds the iron
+  plates it cost **and** every item currently riding it — nothing on the belt is lost.
+- **Dismantling a machine no longer destroys its belts.** Tearing down a building (or a Miner
+  Mk1) on either end of a belt leaves the belt in place; it simply dangles (items still drain
+  toward a surviving end, or pile up at a removed one) until you remove it by hand. Building
+  ids are now stable so a rebuilt machine never silently inherits a leftover belt.
+
+![A conveyor belt carrying Iron Ingots from a Smelter toward a Constructor across the world map](docs/images/changelog/v0.21.2-belt-clog.png)
+
+## [0.21.1] — 2026-07-15
+
+### Fixed
+
+- **Belt-delivered items now show in the destination's input.** A building card only ever
+  drew input slots for its *currently-selected* recipe, so items a conveyor belt dropped in
+  that the current recipe doesn't use (e.g. Iron Ingot arriving at a Constructor set to make
+  Wire) landed in the input buffer but were **invisible** — they looked like they "weren't
+  added." The card now surfaces a slot for **every** item sitting in the input buffer, so
+  belt-fed items are always visible and can be unloaded.
+
+### Changed
+
+- **Building inputs now have a max stack (500), like outputs.** Each input resource caps at
+  500 — shown as \`X / 500\` on the slot — enforced for hand-loading too (Load buttons disable
+  when a slot is full). A full input backs its feeding belt up to the source, which then
+  idles, mirroring how a full output already backs a machine up.
+- **The conveyor surface animation now scrolls at the item travel speed.** The belt's moving
+  texture was running at a fixed rate unrelated to how fast items actually travel; it now
+  matches the item speed exactly, at every zoom level, so the belt and the items on it move
+  together.
+
+![A Constructor's input slot showing 4 / 500 Iron Ingot delivered by a conveyor belt, with the new per-input max-stack cap visible](docs/images/changelog/v0.21.1-belt-input-visible.png)
+
 ## [0.21.0] — 2026-07-15
 
 ### Added
