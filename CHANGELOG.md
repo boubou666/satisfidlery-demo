@@ -18,6 +18,92 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.25.0] — 2026-07-15
+
+### Added
+
+- **Machines show their belt ports — and belts snap onto them.** Every automatable machine now
+  draws its conveyor hookups right on the map: a **blue input** nub on its left and an **amber
+  output** nub on its right, each a small right-pointing arrow so a node reads as a left→right
+  flow at a glance (a Miner Mk1 node shows its single output). When you draw a belt it no longer
+  meets the machine at its center — the route **snaps to the ports**: it leaves the source's
+  output nub and lands on the destination's input nub, both while you're drawing (the live ghost
+  route snaps too) and once it's built. In belt mode the ports you'd wire up next — outputs
+  before a source is armed, inputs after — brighten and pulse to guide the click.
+
+  Ports are laid out in world space (`beltPorts`/`beltPortPos` in `belts.ts`) so a nub and a
+  belt endpoint always coincide at any zoom, and the overlay paints above the node markers so a
+  port is never hidden behind its disc. `planBelt` and the draw preview share the same
+  port-snapping, so the ghost you draw is exactly the belt you get.
+
+  ![Iron Ore, Smelter and Constructor on the map, each with a blue input and amber output port, with belts plugged into the ports](docs/images/changelog/v0.25.0-belt-ports.png)
+
+## [0.24.4] — 2026-07-15
+
+### Added
+
+- **Press `R` to cycle the belt path shape — live while you draw.** In belt mode, `R` steps the
+  shape Straight → Curved → 90° → Straight without reaching for the picker. Because the shape
+  feeds the live route preview, cycling **mid-draw re-shapes the ghost instantly** — arm a
+  source, drop a couple of bends, then tap `R` to see the same route as a straight run, a smooth
+  curve, or a right-angle L and pick what fits. The coach card gains an `R to cycle` hint under
+  the picker. The shortcut is ignored while a belt is actively laying, while typing in a field,
+  or with a modifier (so Ctrl/Cmd+R still reloads). Small handler in `MapView.tsx`.
+
+  ![The belt coach card with the shape cycled to 90° via R, and the "R to cycle" hint](docs/images/changelog/v0.24.4-belt-shape-r-key.png)
+
+## [0.24.3] — 2026-07-15
+
+### Changed
+
+- **Tidied the belt-mode coach bar.** Adding the shape picker had crammed the long instruction
+  text, the three shape buttons, and Done into a single full-radius pill, which squeezed the
+  text into a tall narrow column and ballooned into an ugly lozenge. It's now a proper **rounded
+  card**: the coach text sits on top (wrapping naturally at a readable width), with a controls
+  row beneath — the Straight / Curved / 90° segmented picker on the left and **Done** on the
+  right. Layout-only (`map-belt-hint` markup + CSS in `MapView.tsx` / `index.css`); no behaviour
+  change.
+
+  ![The belt-mode coach card: instruction text above a shape-picker + Done row](docs/images/changelog/v0.24.3-belt-hint-card.png)
+
+## [0.24.2] — 2026-07-15
+
+### Fixed
+
+- **Curved belts now run through their junction dots, and the routing preview matches the
+  finished belt.** Two fixes to the Curved shape:
+  - The midpoint spline from 0.24.1 *approximated* the route — it rounded **inside** the
+    waypoints, so the junction dots floated off the belt line. The curve is now a **centripetal
+    Catmull-Rom spline that passes exactly through every waypoint** (and both endpoints) while
+    staying tangent-continuous, so the line rides its junctions. Centripetal (α=0.5) knot spacing
+    also prevents the cusps/self-loops uniform splines make at sharp bends.
+  - While routing, the draft styled `[source…bends]` and the cursor tail as **two separate**
+    splines, so the ghost didn't match the single spline that gets committed. The preview is now
+    one styled path through the live cursor as the provisional destination — **exactly what
+    builds** when you click the end machine.
+
+  Pure `styleBeltPath` change in `belts.ts` (`curvedPath` → Catmull-Rom) plus the belt-draft
+  rework in `MapView.tsx`; no save changes. Straight and 90° are unaffected.
+
+  ![A curved belt running smoothly through both of its junction dots, beside a straight and a 90° belt](docs/images/changelog/v0.24.2-belt-curve-through-waypoints.png)
+
+## [0.24.1] — 2026-07-15
+
+### Changed
+
+- **Curved belts now join their bends smoothly.** The Curved shape was a per-leg bow, which
+  left a visible kink where two legs met at a waypoint. It's now the classic **quadratic spline
+  through the leg midpoints** — each waypoint is a control point and adjacent quads share a
+  midpoint with matching tangents, so the whole route is **C1-continuous** (no corner) through
+  every bend. The true endpoints A and B stay pinned; a **bend-free A→B still arcs** (its angle
+  derived from the endpoint positions, unchanged). Because the spline rounds/shortcuts a sharp
+  corner, a curved belt through a hard bend is now a touch **shorter** than the straight
+  polyline through that waypoint (so slightly cheaper/faster) rather than longer — still a
+  coherent physical route. Pure `styleBeltPath` change in `belts.ts` (`curvedPath` + `sampleQuad`);
+  no save/UI changes.
+
+  ![A curved belt flowing as a smooth S through two waypoints, beside a straight and a 90° belt](docs/images/changelog/v0.24.1-belt-curve-spline.png)
+
 ## [0.24.0] — 2026-07-15
 
 ### Added
