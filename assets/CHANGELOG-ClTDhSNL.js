@@ -18,6 +18,22 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.25.4] — 2026-07-15
+
+### Fixed
+
+- **Belts route around a machine instead of through it.** When a source sat directly above (or
+  otherwise opposite) its destination, the straight line from the output nub (right side) to the
+  input nub (left side) cut across the destination's disc — the belt appeared to run *through*
+  the building. Belts now leave and enter along the machine face like Satisfactory: every belt
+  exits its output to the right and approaches its input from the left (a short horizontal lead
+  off each port, extended in 0.25.3 for curves to *all* styles). So a stacked belt makes a tidy
+  Z/loop around the disc to reach the far-side port instead of slicing through it — in the built
+  belt and the live draw ghost alike. The lead is capped to a fraction of the run, so machines
+  sitting side-by-side still get a clean straight belt with no zig-zag.
+
+  ![A belt from a miner stacked above a smelter routing in a Z around the smelter's disc into its input, and a straight belt to a side-by-side constructor](docs/images/changelog/v0.25.4-belt-route-around.png)
+
 ## [0.25.3] — 2026-07-15
 
 ### Added
