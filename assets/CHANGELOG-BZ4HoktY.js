@@ -18,6 +18,31 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.19.2] — 2026-07-15
+
+### Fixed
+
+- **Build radial nodes drifted off the ring.** Each option was positioned by its whole
+  box (disc **+** label **+** cost), so a node with more cost lines — the Biomass Burner
+  carries three — pushed its disc higher than its neighbours, and the four-building menu
+  looked lopsided. Each node is now anchored by its **disc**, with the label and cost
+  floating below it, so all discs sit exactly on the ring (a clean, symmetric cross);
+  bumped the ring radius a touch for breathing room.
+
+![The build radial with four options — Smelter, Biomass Burner, Constructor, Equipment Workshop — discs evenly aligned on the ring](docs/images/changelog/v0.19.2-build-radial-aligned.png)
+
+## [0.19.1] — 2026-07-15
+
+### Fixed
+
+- **Biomass Burner shared the Smelter's flame icon.** In the build radial and on the
+  map, the new Biomass Burner rendered the generic \`flame\` glyph — which is nearly
+  identical to the Smelter's own small-flame glyph, so the two build options were hard
+  to tell apart. Gave the burner its own \`burner\` glyph: a furnace housing with a lit
+  stoke window and stubby feet, clearly distinct from the Smelter's bare flame.
+
+![The build radial: the Biomass Burner now shows a furnace-housing icon, distinct from the Smelter's flame](docs/images/changelog/v0.19.1-burner-icon.png)
+
 ## [0.19.0] — 2026-07-15
 
 ### Added
