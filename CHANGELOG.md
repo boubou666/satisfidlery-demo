@@ -18,6 +18,23 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.16.0] — 2026-07-15
+
+### Added
+
+- **Playable web demo, published from a separate public repo.** The game's source stays in
+  the private repo; a compiled, in-browser demo is now served via GitHub Pages at
+  **https://boubou666.github.io/satisfidlery-demo/** from the public
+  `satisfidlery-demo` repo (built artifacts + a copy of this changelog only — no source).
+  `npm run deploy:demo` builds and publishes it in one step, and it re-publishes automatically
+  on every MINOR/MAJOR version bump.
+- **"DEV BUILD" version banner in the demo.** The public demo shows a small bottom-right
+  marker with the current version (e.g. `DEV BUILD · v0.16.0`) so players always know it's a
+  work-in-progress dev build and exactly which version they're on. It appears **only** in the
+  demo build (`npm run build:demo`) — the Steam/Electron build and the dev server stay clean.
+
+![Dev-build version banner in the public web demo](docs/images/changelog/v0.16.0-demo-dev-banner.png)
+
 ## [0.15.1] — 2026-07-15
 
 ### Fixed
