@@ -18,6 +18,25 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.28.0] — 2026-07-16
+
+### Added
+
+- **Snap buildings to an invisible world grid for clean factories.** While placing a building or
+  the HUB, press **G** (or tap the new **Grid** toggle in the placement coach bar) to snap the ghost
+  — and the spot it commits to — onto a hidden lattice; press again to go back to free positioning.
+  When snapping is on, the lattice shows as faint dots inside the build ring so you can see exactly
+  where the ghost can land. Free placement is still the default, so nothing changes unless you ask
+  for the grid.
+- **Every ore node now lands on that same grid.** The procedural deposit field (and the early
+  hand-placed anchors) snap to the world lattice — origin at the HUB — so a Miner Mk1 built onto a
+  node and a grid-snapped Smelter beside it line up on the same rows and columns, and belts run
+  clean between them. Nodes still scatter naturally (they jitter across a wide cell before snapping);
+  they just always settle on a grid point now, and two nodes never share one. A node-mounted Miner
+  Mk1 ignores the toggle — it always rides its node, which is already on the grid.
+
+  ![Placing a Smelter with grid-snap on: the build ring fills with the lattice and the ghost sits on a grid point](docs/images/changelog/v0.28.0-grid-snap.png)
+
 ## [0.27.2] — 2026-07-16
 
 ### Changed
