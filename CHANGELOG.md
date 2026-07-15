@@ -18,6 +18,26 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.26.0] — 2026-07-16
+
+### Added
+
+- **Place buildings where you want, and rotate them.** Picking a building (or the HUB) from the
+  build radial no longer drops it at your feet — it arms **placement mode**: a translucent ghost
+  follows the cursor inside a **build-radius ring** drawn around you (`BUILD_RADIUS`, ~80 m), and a
+  tap inside the ring drops it there. Beyond the ring the ghost reads invalid (red) and the tap is
+  inert; right-click or **Esc** cancels. Before dropping, press **R** (or the on-screen **Rotate**
+  button) to turn the building — its belt input/output ports swing round with it (E→S→W→N), so you
+  can face a machine's intake at the belt feeding it. Placed buildings keep their facing.
+
+  Under the hood: `Building` gains an `orientation` (0–3 quarter-turns; save **v27**, older saves
+  default to 0). A new `portGeom(orientation, role)` in `belts.ts` is the single source of truth for
+  which way a port faces, consumed by the nub geometry, the belt leads/wrap routing, and the port
+  chevrons in `MapView.tsx` — so belts still plug cleanly into a rotated machine. Store placement is
+  now `placeBuilding(type, pos, orientation)` / `placeHubAt(pos)`, both gated to the build radius.
+
+  ![Building placement mode](docs/images/changelog/v0.26.0-building-placement.png)
+
 ## [0.25.8] — 2026-07-15
 
 ### Fixed
