@@ -18,6 +18,91 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.21.0] — 2026-07-15
+
+### Added
+
+- **Conveyor Belt MK1 — automatic item logistics.** A new HUB milestone, **Conveyor
+  Logistics** (unlocked by submitting iron plates, iron rods, wire, cable, and concrete),
+  brings the first hands-free way to move items between machines. On the map, a new **Belt**
+  mode lets you draw a belt by hand: **click a source** (a Smelter, a Constructor, or a
+  Miner Mk1 ore node), **tap empty ground** to bend the route as many times as you like,
+  then **click a destination machine** to finish. It costs iron plates by length (≈1 plate
+  per 120 m, refunded on teardown) and — like a powerline — **lays itself segment by
+  segment** over a few seconds.
+- **Items ride the belt.** Once a belt is fully laid it pulls the source's output and
+  carries it to the destination's input at **30 items/min**, one whole item at a time. The
+  items genuinely **travel** — a longer belt takes longer to cross — and you watch them
+  glide along the track on the map. A backed-up destination (input full) makes the belt back
+  up all the way to the source, which then idles; draining the destination gets it flowing
+  again. Belts run live and offline, and dismantling a machine (or a Miner Mk1) pulls the
+  belts attached to it, refunding their plates. The Equipment Workshop is not belt-connectable.
+
+![A conveyor belt running from a Smelter through two hand-placed bends to a Constructor, with Iron Ingots riding along it, and the new Belt tool in the map toolbar](docs/images/changelog/v0.21.0-conveyor-belts.png)
+
+## [0.20.4] — 2026-07-15
+
+### Fixed
+
+- **Unload buttons are disabled when the inventory is full too.** Extending the previous
+  fix to every "move items back to the grid" action: a building input's **Unload**, a
+  generator's (Biomass Burner) leaf-fuel **Unload**, and the HUB burner bank's fuel
+  **Unload** now disable when the grid has no room for what they'd return — same
+  "Inventory full — free up space to collect" tooltip. Previously these clicked through to
+  a silent no-op on a full grid. Room is per-item, so freeing a single slot re-enables them.
+
+![A Smelter and a Biomass Burner on a full 17 / 17 grid, with the Smelter's input Unload, its output Collect, and the burner's fuel Unload all greyed out](docs/images/changelog/v0.20.4-unload-disabled-when-full.png)
+
+## [0.20.3] — 2026-07-15
+
+### Fixed
+
+- **Collect buttons are disabled when the inventory is full.** A source's **Collect**
+  (and a building's output **Collect**) button stayed clickable even with no room in the
+  grid — clicking just did nothing (the transfer is a lossless partial-fill, so a full
+  grid moves zero). The buttons are now **disabled** whenever the grid has no room for
+  what they'd collect, with an "Inventory full — free up space to collect" tooltip, so the
+  dead click is impossible. Room is per-item: as soon as a single unit fits again (a stack
+  freed or partially collected elsewhere), the button re-enables.
+
+![A source holding 122 Iron Ore with its Collect button greyed out because the inventory grid is full at 17 / 17 stacks](docs/images/changelog/v0.20.3-collect-disabled-when-full.png)
+
+## [0.20.2] — 2026-07-15
+
+### Fixed
+
+- **Miners never deliver a partial ore.** A **poor** deposit yields ×0.5, so a mining
+  cycle produced **half an ore** — which accumulated into the buffer (and then the
+  inventory on collect) as fractional counts like `9.5 Iron Ore`. Mining now works like
+  the burner's whole-leaf burn: a source's progress bar counts toward the next **whole
+  ore**, advancing at the deposit's quality-scaled rate (yield ÷ cycle time, boosted for
+  a Miner Mk1), and only whole ore is ever added to the buffer. A poor node simply takes
+  twice as long to hand over each ore — the bar completing now **always** means exactly
+  one ore. Rich (pure ×2) and normal nodes are unchanged in rate. The source's rate label
+  reflects this too: a poor node reads **"1 per 4s"** instead of a fractional "0.5 per 2s".
+  Same average throughput as before, but a collected stack can never be fractional.
+
+![A poor-quality Iron Ore source being hand-mined, its rate reading "1 per 4s" and its buffer holding a whole 9 Iron Ore](docs/images/changelog/v0.20.2-whole-ore-mining.png)
+
+## [0.20.1] — 2026-07-15
+
+### Fixed
+
+- **Leaves are burned as whole items — no more fractional leaf counts.** A running
+  Biomass Burner (and the HUB burner bank) drained its leaf fuel *continuously*, so its
+  fuel store sat at values like `97.86`. Loading more leaves into a partly-burnt store
+  then computed a fractional `room` (`cap − fuel`) and moved a fractional quantity out
+  of the inventory — leaving a floating stack behind (e.g. **2.14 leaves**). Fuel is now
+  a **discrete whole-leaf count**: the burn advances a `burnProgress` toward the next
+  leaf (mirroring how mining and smelting accumulate toward the next unit) and deducts a
+  **whole leaf** each time one completes, so a leaf in a generator is either fully present
+  or fully spent — never half-consumed. Loading only ever moves whole leaves, so the
+  inventory can never hold a fraction. The fuel countdown ("empties in …") accounts for
+  the leaf mid-burn. Loading a save cleans up any legacy fractional fuel *and* any
+  floating item stack left by the old behavior (both are floored to whole units).
+
+![A running Biomass Burner showing a whole 7 / 100 leaves of fuel ("empties in 2:05") and an inventory holding a clean whole stack of 20 leaves](docs/images/changelog/v0.20.1-discrete-leaf-fuel.png)
+
 ## [0.20.0] — 2026-07-15
 
 ### Added
