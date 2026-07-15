@@ -18,6 +18,17 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.25.6] — 2026-07-15
+
+### Fixed
+
+- **The belt draw ghost follows the cursor again.** A regression in 0.25.5's routing rework
+  dropped the cursor point from the ghost when the far end wasn't a machine — so after you armed a
+  source, the preview was just a stub at the output and never trailed to your pointer, making belt
+  drawing feel broken (you could still connect by hovering a destination, but free-drawing showed
+  nothing). The free-cursor case now correctly trails the ghost out to the pointer again.
+  (One-line fix in `beltRenderAnchors`, `MapView.tsx`.)
+
 ## [0.25.5] — 2026-07-15
 
 ### Changed
