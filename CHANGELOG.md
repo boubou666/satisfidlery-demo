@@ -18,6 +18,22 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.20.0] — 2026-07-15
+
+### Added
+
+- **Buildings back up when their output is full — and stop drawing power.** A placed
+  machine's output buffer now caps at **500** units of a product (`BUILDING_MAX_BUFFER`).
+  Once there's no room for another cycle, the machine idles: it stops producing and, if
+  it's wired to the grid, drops out of the grid's demand entirely — so it draws **no
+  power** and a generator feeding it stops spending its capacity on it (exactly how a
+  full **Miner Mk1** already idles and stops drawing). Collect the backlog and it resumes.
+  The building card shows an **"Output full — collect to resume"** status, and the cap is
+  respected live and offline (a long offline stretch can't overshoot it). Previously a
+  building ran and drew power forever while it had inputs, hoarding output without bound.
+
+![A Smelter wired to a Biomass Burner, its output buffer full at 500 Iron Ingot, showing "Output full — collect to resume" and drawing no power](docs/images/changelog/v0.20.0-output-full-idle.png)
+
 ## [0.19.2] — 2026-07-15
 
 ### Fixed
