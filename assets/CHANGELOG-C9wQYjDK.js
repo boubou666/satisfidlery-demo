@@ -18,6 +18,21 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.25.1] — 2026-07-15
+
+### Fixed
+
+- **Belt ports now hug the machine disc at every zoom.** In 0.25.0 the input/output nubs sat a
+  fixed *world* distance off the node, but a machine's disc is a fixed *on-screen* size — so
+  zooming in flung the ports far off the disc (and dragged the belt endpoints with them). Ports
+  are now placed a constant *on-screen* distance off the disc center (\`portLayer\` in
+  \`MapView.tsx\`, ÷zoom), so they stay pinned to the disc's left/right edge at any zoom. Belts
+  store a plain center-to-center route again (zoom-independent length/cost) and the map re-seats
+  their drawn endpoints onto the nubs — so built belts *and* the live draw preview visibly plug
+  into the ports whether you're zoomed all the way in or out.
+
+  ![Iron Ore, Smelter and Constructor with input/output port nubs pinned to each disc, belts plugged into them](docs/images/changelog/v0.25.1-belt-ports-hug.png)
+
 ## [0.25.0] — 2026-07-15
 
 ### Added
