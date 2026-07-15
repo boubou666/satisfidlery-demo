@@ -18,6 +18,33 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.23.0] — 2026-07-15
+
+### Added
+
+- **"Free fuel" cheat — a testing toggle in Options → Cheats.** Flip it on and
+  **every power generator runs at full output without any fuel** — the HUB's biomass
+  burner bank and every placeable Biomass Burner alike — so grids stay powered from a
+  completely empty fuel store, and generators **stop consuming fuel** entirely (any
+  leaves already loaded just sit there, honest to unload). Generators still have to be
+  built, switched on, and un-tripped to deliver power — the cheat only waives the
+  fuel requirement. It sits below "Infinite resources", persists across reloads
+  (separate from your save, like the language and speed settings), and is off by
+  default. Handy for exercising power-hungry setups without hauling leaves.
+
+  ![The Free fuel toggle in the Options → Cheats section](docs/images/changelog/v0.23.0-free-fuel.png)
+
+## [0.22.1] — 2026-07-15
+
+### Added
+
+- **Right-click cancels an in-progress belt.** While routing a conveyor belt, once you've
+  armed a source (and placed any bends, or picked a pending destination), a **right-click
+  anywhere on the map** now clears that selection and drops you back to "pick a source" —
+  without leaving belt mode, so you can start the route over. Left-click behaviour (pan,
+  arm, bend, pick destination) is unchanged, and right-click still does nothing outside an
+  active belt selection. (No screenshot: it's an interaction a still frame can't show.)
+
 ## [0.22.0] — 2026-07-15
 
 ### Changed
