@@ -18,6 +18,117 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.24.0] — 2026-07-15
+
+### Added
+
+- **Conveyor belts can be routed in three path shapes — Straight, Curved, or 90°.** A new
+  segmented **Shape** picker sits in the belt-mode hint bar; the choice previews live on the
+  draft route and is baked into the finished belt:
+  - **Straight** — direct segments through your bends (the classic route).
+  - **Curved** — each leg bows into a smooth arc whose **angle is derived from the endpoint
+    positions** (a horizontal run bows differently than a vertical or diagonal one), so even a
+    bend-free A→B curves.
+  - **90°** — right-angle (Manhattan) routing: every leg turns as an L, travelling the
+    longer axis first.
+
+  Because the shape is the belt's *real* geometry, it feeds the existing length-based model:
+  an angled belt is physically longer than the straight diagonal, so it **costs more iron
+  plates and moves items slower**; a curve sits in between (e.g. for the same two machines here,
+  straight ≈ 728 u, curved ≈ 743 u, angled ≈ 900 u). Bend dots still mark only your hand-placed
+  waypoints, not the subdivided curve/corner points. New pure \`styleBeltPath(anchors, style)\`
+  in \`belts.ts\` (threaded through \`planBelt\` → \`connectBelt\`); \`Belt\` gains \`style\` + \`waypoints\`
+  and the save bumps to **v26** (old belts load as Straight). Three \`belt-*\` glyphs added to
+  \`UiIcon\` — no emoji, per project rule.
+
+  ![Belt-mode Shape picker (Straight / Curved / 90°) with all three belt shapes running on the map](docs/images/changelog/v0.24.0-belt-path-styles.png)
+
+## [0.23.6] — 2026-07-15
+
+### Changed
+
+- **Conveyor Belt MK1 now runs at 60 items/min (was 30).** \`BELT_MK1_RATE\` doubled to 1 item/s
+  (one every 1 s), so a belt exactly keeps up with a normal-quality **Miner Mk1**'s 60/min output
+  instead of bottlenecking it at half. Free-flow item spacing halves to ~80 u (\`SPEED ÷ 60/min\`)
+  and the offline entry pacing (\`BELT_SIM_STEP\` ≤ the now-1 s entry period) still delivers full
+  throughput; belt cost, transit speed, and clogging behaviour are unchanged. Milestone/def copy
+  and the on-map rate tooltip (driven by \`BELT_MK1_RATE\`) update to "60/min" automatically.
+- **Confirmed the Miner Mk1 already mines at the intended 30 / 60 / 120 per min** on
+  poor / normal / pure nodes — \`(yield ÷ cycle) × quality × MINER_MK1_YIELD_MULT\` = \`(1÷2) × {0.5,1,2}
+  × 2\`. No code change needed; this entry records the verification. (No screenshot: a
+  throughput-number tweak that a still frame can't convey — it only surfaces as a belt/tooltip
+  rate on a fully-progressed save.)
+
+## [0.23.5] — 2026-07-15
+
+### Fixed
+
+- **A hand-routed powerline now lays over time instead of appearing instantly.** 0.23.4
+  committed a routed run (through dropped poles) in a single frame, unlike a direct node→node
+  connection which strings segment-by-segment. Now both take the same path: \`planPowerRoute\`
+  folds the waypoint poles and any auto-inserted ones into one connection plan, and confirming
+  queues the timed \`powerBuild\` — the wire strings hop by hop and each pole rises as it reaches
+  it, with the "Laying powerline… X/Y segments" progress showing throughout. Same one-at-a-time
+  rule as any other connection (the confirm button waits while a build is in flight). (No
+  screenshot: it's a build-timing change a still frame can't convey.)
+
+## [0.23.4] — 2026-07-15
+
+### Changed
+
+- **Routing a powerline through hand-placed poles now stays a ghost until you finish it.**
+  0.23.3 committed a real pole + wire on every empty-ground tap; now those taps drop **ghost
+  route poles** (bends) instead — the whole run previews as a dashed line from the armed node
+  through your dropped poles to the cursor, and **nothing is built or paid for** until the
+  route reaches a destination node. Picking that node opens the confirm popover with the
+  **full route's** cost (all poles + cable, auto-inserting extra poles on any gap longer than
+  one segment); accepting lays the entire run at once. Cancelling (or a right-click) discards
+  the ghost, and with nothing armed an empty-ground tap still drops a lone standalone pole.
+  Mirrors how conveyor belts are routed (drop bends, then pick the destination).
+
+![Ghost powerline route through dropped poles](docs/images/changelog/v0.23.4-power-route-ghost.png)
+
+## [0.23.3] — 2026-07-15
+
+### Fixed
+
+- **Dropping a power pole while connecting now actually wires it up.** Previously, after you
+  armed a node in powerline mode, tapping empty ground dropped a *standalone* pole — the
+  powerline between the armed building and that pole was never created. Now the tap runs the
+  line: it places the pole **and** wires the armed endpoint to it in one step (auto-inserting
+  intermediate poles if the span is longer than one segment), then re-arms to the new pole so
+  you can keep routing the run pole-by-pole across the map. A hand-dropped pole connects
+  instantly (like placing the pole itself), rather than laying over time. With nothing armed,
+  an empty-ground tap still drops a lone pole as before, and the coach line now spells the
+  option out ("…or tap empty ground to run the line to a new pole").
+
+![A building wired to a hand-placed pole](docs/images/changelog/v0.23.3-pole-wire.png)
+
+## [0.23.2] — 2026-07-15
+
+### Added
+
+- **A live "ghost" preview while routing a powerline** — the power-mode counterpart of the
+  belt ghost (0.21.9). Once you arm the first node, a faint dashed line now trails from it to
+  your cursor (gold, with a softly pulsing tip dot), so you can see the connection before you
+  pick the second node. It clears the moment the pair is chosen (the cost popover / real laid
+  route takes over), and on cancel or exit. Tracked by sampling the pointer in world space on
+  \`onPointerMove\` (skipped while actively panning so the ghost doesn't chase the drag).
+
+![Powerline ghost preview](docs/images/changelog/v0.23.2-powerline-ghost.png)
+
+## [0.23.1] — 2026-07-15
+
+### Added
+
+- **Right-click cancels an in-progress powerline too.** Mirroring the belt-mode cancel
+  (0.22.1), a **right-click anywhere on the map while in powerline mode** now clears the
+  armed endpoint (or a pending pair awaiting the cost popover) and drops you back to "pick a
+  node to start" — without leaving powerline mode, so you can restart the connection.
+  Left-click behaviour (pan, arm, drop a pole, pick the second node) is unchanged, and
+  right-click is still inert when no powerline connection is in progress. (No screenshot:
+  it's an interaction a still frame can't show.)
+
 ## [0.23.0] — 2026-07-15
 
 ### Added
