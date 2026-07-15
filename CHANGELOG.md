@@ -18,6 +18,20 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.25.7] — 2026-07-15
+
+### Changed
+
+- **Curved belts leave and enter their ports straight.** A curved belt used to start bending the
+  instant it left the output (its spline ran through a single port lead), so the connection at the
+  machine looked slightly skewed. Curved belts now get a **pair of collinear leads** off each
+  port, giving the spline a genuinely straight run out of the output and into the input — along
+  the line from the machine's center through the port — before it eases into the curve. Straight
+  and 90° belts were already straight at the ports; this brings curved into line, in the built
+  belt, the draw preview, and the wrap-around routes.
+
+  ![Curved belts between a miner, smelter and constructor, each leaving and entering its port with a short straight radial stub before curving](docs/images/changelog/v0.25.7-belt-curve-straight-ports.png)
+
 ## [0.25.6] — 2026-07-15
 
 ### Fixed
