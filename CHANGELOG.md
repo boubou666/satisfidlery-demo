@@ -18,6 +18,20 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.25.2] — 2026-07-15
+
+### Fixed
+
+- **90° (and curved) belts keep true right-angles when plugged into the ports.** The 0.25.1 nub
+  re-seating moved a belt's endpoints *after* the route was styled, which knocked an angled
+  belt's corners off-axis (a "90°" belt drew a skewed dogleg) and kinked curved belts. The map
+  now feeds the port nubs in as the route's *anchors* and styles from there
+  (`beltStyledPath`/`beltNubWorld` in `MapView.tsx`), so Straight / Curved / 90° all route
+  cleanly from the source's output nub to the destination's input nub — built belts, the live
+  draw preview, and the items riding them all follow the same corrected path.
+
+  ![An angled belt routing as a clean right-angle L from a machine's output nub into the next machine's input nub](docs/images/changelog/v0.25.2-belt-angle-fix.png)
+
 ## [0.25.1] — 2026-07-15
 
 ### Fixed
