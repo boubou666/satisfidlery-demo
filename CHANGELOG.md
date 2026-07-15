@@ -18,6 +18,39 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.19.0] — 2026-07-15
+
+### Added
+
+- **Biomass Burner — a placeable power generator.** Unlocked by the **Mining Automation**
+  milestone, the Biomass Burner is the portable counterpart to the HUB burner bank: build one
+  anywhere for **15 iron plates · 15 iron rods · 25 wires**, wire it into your grid, and load
+  leaves to run your machines hands-free. It works exactly like the HUB burners — its own leaf
+  fuel store (drag leaves onto the bar or use Load / Unload while standing at it), a master
+  pause/resume, a live **30 kW** output, and a breaker that trips on overload. Each burner is a
+  real generator on the network: `powerNetwork` now sums generation from the HUB **and** every
+  burner building on a grid, so a smelter wired to a burner auto-runs (live and offline) off the
+  30 kW it supplies.
+- **Grid-wide breaker reset.** When an overloaded grid trips, resetting the breaker from **any**
+  generator on it — a burner building or the HUB bank — relaunches the whole network at once
+  (every generator on that grid un-trips together), instead of resetting one at a time.
+
+Save bumped to **v23** (buildings now persist generator fuel / running / tripped state;
+older saves load forward-tolerantly).
+
+![The Buildings tab: a Biomass Burner generating 30 kW (79/100 leaves, empties in 26:32) wired to a Smelter that reads Powered · 4 kW and auto-runs on grid power](docs/images/changelog/v0.19.0-biomass-burner-building.png)
+
+## [0.18.1] — 2026-07-15
+
+### Fixed
+
+- **Mining Automation milestone card showed raw string keys.** The card rendered
+  the literal `hub.automation.stakes` and `hub.automation.doneHint` instead of
+  text, because those i18n strings were never authored. Added them (EN + FR), and
+  filled the French `hub.power.stakes` / `hub.power.doneHint` strings that were
+  missing the same way — so both the Power Grid and Mining Automation milestones
+  now read correctly in both languages.
+
 ## [0.18.0] — 2026-07-15
 
 ### Added
