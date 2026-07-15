@@ -18,6 +18,18 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.25.8] — 2026-07-15
+
+### Fixed
+
+- **The belt-laying animation follows the real route.** The build (lay) overlay drew along the
+  belt's stored center-to-center path, while the draw ghost and the finished belt use the routed
+  path (port leads + wrap-around junctions). So while a belt was being laid it traced a different
+  line — e.g. straight through a machine — then snapped to the wrapped route the instant it
+  finished. The lay now renders along that same routed path, mapping its per-segment progress to a
+  fraction of the route, so the ghost, the laying belt, and the built belt all show one consistent
+  line. (Belt-build overlay in \`MapView.tsx\`.)
+
 ## [0.25.7] — 2026-07-15
 
 ### Changed
