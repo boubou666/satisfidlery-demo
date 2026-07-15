@@ -18,6 +18,21 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.18.0] — 2026-07-15
+
+### Added
+
+- **Inventory slots now grow with your progress.** A fresh grid starts at **12** stack slots
+  (down from the old flat 24), and every **HUB milestone** you complete (Field Fabrication,
+  Assembly Line, Equipment Workshop, Power Grid, Mining Automation) permanently unlocks **one
+  more slot** — so building out the factory is also what expands your carrying capacity. The
+  live capacity is `12 + milestones built`; the count in the Inventory header (`used / max`)
+  reflects it, and the grid resizes the moment a milestone is built. Older saves are migrated
+  losslessly: the grid is resized to the capacity your milestones earn, and any items that sat
+  in the old larger grid are folded back into stacks rather than dropped (save bumped to v22).
+
+![Inventory showing 6 / 14 slots — the base 12 plus one each for two completed HUB milestones](docs/images/changelog/0.18.0-inventory-slots.png)
+
 ## [0.17.0] — 2026-07-15
 
 ### Added
