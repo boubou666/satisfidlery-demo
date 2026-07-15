@@ -1,4 +1,4 @@
-# Changelog
+const e=`# Changelog
 
 All notable changes to **Satisfidlery** are recorded here, newest first. Each
 completed piece of work gets an entry — with a screenshot whenever the change is
@@ -6,12 +6,12 @@ visible in-game.
 
 **Versioning** (pre-1.0, the game is in active development):
 
-- **MAJOR** (`X.0.0`) — a landmark: the first Steam release, or a sweeping
+- **MAJOR** (\`X.0.0\`) — a landmark: the first Steam release, or a sweeping
   overhaul of the game's systems or content.
-- **MINOR** (`0.X.0`) — a new player-facing feature or system.
-- **PATCH** (`0.0.X`) — improvements, fixes, and tweaks to existing features.
+- **MINOR** (\`0.X.0\`) — a new player-facing feature or system.
+- **PATCH** (\`0.0.X\`) — improvements, fixes, and tweaks to existing features.
 
-Screenshots live in [`docs/images/changelog/`](docs/images/changelog). History
+Screenshots live in [\`docs/images/changelog/\`](docs/images/changelog). History
 before this file is in the git log.
 
 ## [Unreleased]
@@ -25,8 +25,8 @@ _Nothing yet._
 - **In-game changelog viewer in the demo.** The DEV BUILD banner now has a button (next to
   the version) that opens a **Changelog** panel, styled like the game's own dialogs, listing
   every version's changes right inside the game — no need to leave for GitHub. It reads the
-  same `CHANGELOG.md` that ships with the demo, rendered by a small built-in Markdown reader
-  (bold, `code`, and links; screenshots are omitted). Like the banner, the button and its
+  same \`CHANGELOG.md\` that ships with the demo, rendered by a small built-in Markdown reader
+  (bold, \`code\`, and links; screenshots are omitted). Like the banner, the button and its
   changelog are **demo-only** — the changelog text is lazy-loaded on open and isn't bundled
   into the Steam/Electron build at all.
 
@@ -39,13 +39,13 @@ _Nothing yet._
 - **Playable web demo, published from a separate public repo.** The game's source stays in
   the private repo; a compiled, in-browser demo is now served via GitHub Pages at
   **https://boubou666.github.io/satisfidlery-demo/** from the public
-  `satisfidlery-demo` repo (built artifacts + a copy of this changelog only — no source).
-  `npm run deploy:demo` builds and publishes it in one step, and it re-publishes automatically
+  \`satisfidlery-demo\` repo (built artifacts + a copy of this changelog only — no source).
+  \`npm run deploy:demo\` builds and publishes it in one step, and it re-publishes automatically
   on every MINOR/MAJOR version bump.
 - **"DEV BUILD" version banner in the demo.** The public demo shows a small bottom-right
-  marker with the current version (e.g. `DEV BUILD · v0.16.0`) so players always know it's a
+  marker with the current version (e.g. \`DEV BUILD · v0.16.0\`) so players always know it's a
   work-in-progress dev build and exactly which version they're on. It appears **only** in the
-  demo build (`npm run build:demo`) — the Steam/Electron build and the dev server stay clean.
+  demo build (\`npm run build:demo\`) — the Steam/Electron build and the dev server stay clean.
 
 ![Dev-build version banner in the public web demo](docs/images/changelog/v0.16.0-demo-dev-banner.png)
 
@@ -77,9 +77,9 @@ _Nothing yet._
   - **In-range only** — tapping a _distant_ node still walks you toward it (as before); the
     popover appears once you're in proximity. The card is positioned in screen space, so it
     tracks the node as you pan and zoom, and is flipped/clamped to stay fully on-screen.
-  - Close it with the ✕, the `Esc` key, an outside click, or by re-tapping the node.
-  - Under the hood the deposit and building cards are now shared components (`SourceCard`,
-    `BuildingCard`) reused by both the list tabs and the map — one source of truth, no
+  - Close it with the ✕, the \`Esc\` key, an outside click, or by re-tapping the node.
+  - Under the hood the deposit and building cards are now shared components (\`SourceCard\`,
+    \`BuildingCard\`) reused by both the list tabs and the map — one source of truth, no
     duplicated logic.
 
 ## [0.14.0] — 2026-07-15
@@ -208,9 +208,9 @@ _Nothing yet._
 - **The map now tells generation from consumption at a glance.** The kW pills used to
   all look the same warm gold, so you couldn't tell what was *feeding* the grid from
   what was *pulling* off it. Now **generation** (the HUB burners) shows a **green
-  `+40 kW`** pill with a flame, and each wired machine shows an **amber `−4 kW` /
-  `−6 kW`** draw pill with a bolt. A new **grid-balance readout** in the map's
-  top-right corner sums it up — total **`+gen`** (green) vs. total **`−draw`** (amber)
+  \`+40 kW\`** pill with a flame, and each wired machine shows an **amber \`−4 kW\` /
+  \`−6 kW\`** draw pill with a bolt. A new **grid-balance readout** in the map's
+  top-right corner sums it up — total **\`+gen\`** (green) vs. total **\`−draw\`** (amber)
   across the HUB network — and turns red with an **"Overloaded"** tag when demand
   exceeds supply (the network trips).
 
@@ -316,11 +316,11 @@ _Nothing yet._
 - **Power poles now sit exactly on their wire at every zoom.** Auto-inserted poles
   (the ones dropped along a too-long powerline) looked slightly off their line when
   zoomed in — the disc drifted a pixel or two off the wire it belonged to. Cause: map
-  markers were anchored with CSS `left`/`top`, which the browser **pixel-snaps** inside
+  markers were anchored with CSS \`left\`/\`top\`, which the browser **pixel-snaps** inside
   the scaled world layer; the wires are SVG coordinates and keep full float precision,
   so the tiny snap gap between them got magnified by the zoom (invisible zoomed out,
   ~1px+ zoomed all the way in, more on a large/hi-DPI display). Markers are now anchored
-  with a CSS `translate()` (transforms aren't snapped) instead of `left`/`top`, so the
+  with a CSS \`translate()\` (transforms aren't snapped) instead of \`left\`/\`top\`, so the
   disc lands on its wire endpoint to the sub-pixel at any zoom — measured **0.98px →
   0.00px** offset at max zoom. Applies to every map marker, not just poles.
 
@@ -334,11 +334,11 @@ _Nothing yet._
   click.** Stripping the crash-landed pod for its salvage used to grant the 100 iron
   ingots instantly. It's now the game's opening **12-second timed action**, in the
   same idiom as mining, smelting, hand-crafting, foraging, and scanning: a progress
-  bar runs to completion (`DROP_POD.disassembleSeconds`), the salvage lands only when
+  bar runs to completion (\`DROP_POD.disassembleSeconds\`), the salvage lands only when
   the bar fills, and the button reads **Disassembling…** meanwhile. Like every other
   manual action it's **exclusive** — starting anything else stops it, and starting it
   stops everything else (one action at a time). It advances live and offline through
-  a new `simulatePod()` (which — like `simulateCraft`/`simulateForage` — owns the
+  a new \`simulatePod()\` (which — like \`simulateCraft\`/\`simulateForage\` — owns the
   inventory write the salvage needs), so leaving mid-strip resumes on return. If the
   grid can't hold the full salvage the bar holds full rather than voiding anything.
   Save shape bumped to **v17** (the in-progress disassembly persists); older saves
@@ -369,12 +369,12 @@ _Nothing yet._
 
 - **Map disc glyphs (and the pole's ✕ remove button) are now truly centered.** The
   round map buttons — power poles, node discs, and the pole's remove button — center
-  their icon with `display: grid; place-items: center`, but kept the browser's
-  native button box (`appearance: auto` + UA `padding: 1px 6px`), which shoved the
+  their icon with \`display: grid; place-items: center\`, but kept the browser's
+  native button box (\`appearance: auto\` + UA \`padding: 1px 6px\`), which shoved the
   grid-centered glyph to the right. Measured: the ✕ sat **4.5px** right of center in
   its 18px button (clearly lopsided), and the ⚡ bolt **1px** right in its disc —
   just enough that a pole looked slightly off the powerline it actually sits dead-on.
-  Reset those buttons with `appearance: none; padding: 0`, so the glyph is now
+  Reset those buttons with \`appearance: none; padding: 0\`, so the glyph is now
   centered to the sub-pixel (verified: offset 0.0 on both axes). The pole disc was
   always geometrically on the line; now it *looks* it too.
 
@@ -385,11 +385,11 @@ _Nothing yet._
 ### Changed
 
 - **The HUB finally looks like a HUB.** On the map (and in the build radial) the
-  HUB reused the generic `factory` glyph — a smokestack, indistinguishable from an
+  HUB reused the generic \`factory\` glyph — a smokestack, indistinguishable from an
   actual factory. Gave it a dedicated **domed-headquarters** icon: a rounded dome
   cap over a base structure with a central doorway and lit windows, so the player's
   central base reads at a glance as a command HQ rather than just another building.
-  New `hub` pictograph in `UiIcon.tsx`; `factory` stays put as the generic building
+  New \`hub\` pictograph in \`UiIcon.tsx\`; \`factory\` stays put as the generic building
   fallback.
 
 ![HUB icon reworked](docs/images/changelog/v0.7.4-hub-icon.png)
@@ -399,20 +399,20 @@ _Nothing yet._
 ### Fixed
 
 - **Smooth walk, take three — hand the interpolation to the browser's compositor.**
-  The `requestAnimationFrame` loops from 0.7.1/0.7.2 never reliably repainted the
+  The \`requestAnimationFrame\` loops from 0.7.1/0.7.2 never reliably repainted the
   avatar (an instrumented walk showed its position frozen at ~2 distinct values over
   3+ seconds — the rAF simply wasn't driving the element in practice). Replaced the
   whole JS-prediction scheme with a CSS approach that can't misfire: the avatar and
-  reach ring are positioned with a GPU-compositable `translate3d(...)` that the sim
-  updates to the new position each 100ms tick, and a short `transition: transform
-  0.12s linear` lets the compositor tween between those tick positions at the
+  reach ring are positioned with a GPU-compositable \`translate3d(...)\` that the sim
+  updates to the new position each 100ms tick, and a short \`transition: transform
+  0.12s linear\` lets the compositor tween between those tick positions at the
   display's native frame rate. Position and scale are split across two elements
-  (outer = transitioned translate, inner = `scale(1/zoom)`) so walking is smooth
+  (outer = transitioned translate, inner = \`scale(1/zoom)\`) so walking is smooth
   while zooming stays crisp. Tick positions are still sampled along the exact planned
-  polyline (`playerPos` → `travelPos`), so the glide hugs the pathfinding route.
-- **`PlayerMarker` now subscribes to just the player's x/y**, re-rendering once per
+  polyline (\`playerPos\` → \`travelPos\`), so the glide hugs the pathfinding route.
+- **\`PlayerMarker\` now subscribes to just the player's x/y**, re-rendering once per
   tick during a walk (to update the transform target) and not at all while idle; the
-  avatar SVG is memoized so it isn't rebuilt each tick. `MapView` keeps its ~1×/s
+  avatar SVG is memoized so it isn't rebuilt each tick. \`MapView\` keeps its ~1×/s
   countdown subscription, so the heavy map tree no longer reconciles 10×/s.
 
   ![The avatar mid-walk, centered on the dashed pathfinding route with its reach ring, walking away from the HUB](docs/images/changelog/v0.7.2-smooth-walk.png)
@@ -422,21 +422,21 @@ _Nothing yet._
 ### Fixed
 
 - **The smooth walk from 0.7.1 was still stepping — now it genuinely glides at
-  60 fps.** 0.7.1 added a `requestAnimationFrame` interpolation, but it lived
-  inside `MapView`, which re-renders on **every** 100ms sim tick (it subscribed to
-  the whole `player` object). Each of those 10×/s re-renders re-applied the
-  avatar's `left`/`top` from the stepped, tick-quantized `playerPos(state)` —
+  60 fps.** 0.7.1 added a \`requestAnimationFrame\` interpolation, but it lived
+  inside \`MapView\`, which re-renders on **every** 100ms sim tick (it subscribed to
+  the whole \`player\` object). Each of those 10×/s re-renders re-applied the
+  avatar's \`left\`/\`top\` from the stepped, tick-quantized \`playerPos(state)\` —
   clobbering the smoothing — and the constant reconciliation starved the animation
   frames. Two changes fix it for real:
-  - **The avatar + interaction ring moved into a memoized `PlayerMarker` component**
+  - **The avatar + interaction ring moved into a memoized \`PlayerMarker\` component**
     that subscribes to nothing per-tick, so React never re-renders (and never
     repositions) it during a walk. Its own rAF reads the store directly each frame
-    and interpolates along the exact planned polyline (`travelPos` over
-    `travel.path` — the same line the dashed route draws), predicting forward by
-    wall-clock time between the 10 fps sim updates. Each tick's fresh `travel`
+    and interpolates along the exact planned polyline (\`travelPos\` over
+    \`travel.path\` — the same line the dashed route draws), predicting forward by
+    wall-clock time between the 10 fps sim updates. Each tick's fresh \`travel\`
     object re-anchors the prediction, so it never drifts or overshoots the goal.
-  - **`MapView` no longer re-renders 10×/s during a walk.** It now subscribes to the
-    whole-second travel countdown instead of the full `player` object, so it
+  - **\`MapView\` no longer re-renders 10×/s during a walk.** It now subscribes to the
+    whole-second travel countdown instead of the full \`player\` object, so it
     re-renders about once per second (for the "Traveling… Ns" readout) rather than
     on every tick — leaving the main thread free for the 60 fps avatar animation.
 
@@ -447,14 +447,14 @@ _Nothing yet._
 ### Changed
 
 - **The player now glides smoothly along the planned route instead of shuffling
-  in steps.** The simulation only advances a walk on the game tick (`TICK_MS` =
+  in steps.** The simulation only advances a walk on the game tick (\`TICK_MS\` =
   100ms → 10 fps), so the avatar visibly jumped ~2 world units at a time and read
   as a stepped, gridlike hop. The avatar and its interaction ring are now
-  interpolated every animation frame: a `requestAnimationFrame` loop in `MapView`
-  reads the store's authoritative `travel` and predicts the position forward by
+  interpolated every animation frame: a \`requestAnimationFrame\` loop in \`MapView\`
+  reads the store's authoritative \`travel\` and predicts the position forward by
   wall-clock time between ticks (respecting the game-speed cheat), positioning the
   two elements imperatively so React re-renders aren't needed per frame. It follows
-  the exact same smoothed/curved polyline (`travelPos` over `travel.path`) that the
+  the exact same smoothed/curved polyline (\`travelPos\` over \`travel.path\`) that the
   dashed route preview draws — so the walk now traces the pathfinding line rather
   than snapping across a grid. The store stays the single source of truth: each
   tick re-anchors the prediction, so it can never drift or overshoot the goal.
@@ -467,21 +467,21 @@ _Nothing yet._
 
 - **Foraging is now a timed manual action — you strip a patch leaf-by-leaf, not
   all at once.** Standing at a leaf patch and foraging arms it as an exclusive
-  manual action (like mining/crafting): `simulateForage()` pulls one leaf into the
-  inventory every `LEAF_FORAGE_SECONDS` (1.2s), so a full patch fills your grid
+  manual action (like mining/crafting): \`simulateForage()\` pulls one leaf into the
+  inventory every \`LEAF_FORAGE_SECONDS\` (1.2s), so a full patch fills your grid
   "petit à petit" over ~18s rather than in a single click. It obeys the one-action-
   at-a-time rule (starting a mine/craft/scan/walk stops the forage, and vice
   versa), resumes across a reload, and runs the same offline — but offline harvest
   is still capped at what has actually grown, so it can't be exploited by waiting.
-  The old instant `forageLeafPatch` action is replaced by a `toggleForage` toggle;
+  The old instant \`forageLeafPatch\` action is replaced by a \`toggleForage\` toggle;
   in range, one click on the patch (or its button) starts or stops it.
 - **Leaf patches show an outer regrow ring so a depleted patch reads at a glance.**
   Previously an empty patch differed from a full one only by a faint opacity shift,
   which was hard to see. Each patch now draws a progress ring around the leaf icon
   whose filled arc tracks how regrown it is (empty → full): a freshly-stripped
   patch is a near-empty ring that visibly fills back up as it regrows, and the
-  patch you're actively foraging pulses. Leaf regrow moved from `simulate()` into
-  `simulateForage()` so a single function owns all leaf-patch state.
+  patch you're actively foraging pulses. Leaf regrow moved from \`simulate()\` into
+  \`simulateForage()\` so a single function owns all leaf-patch state.
 
 ![Leaf patches with regrow rings at varied fullness](docs/images/changelog/v0.7.0-forage-ring.png)
 
@@ -489,11 +489,11 @@ _Nothing yet._
 
 ### Changed
 
-- **`npm run window` (Edge app-mode) is again the default launch; the Electron
-  shell is opt-in.** Reverted `scripts/window.mjs` to the simple original launcher
+- **\`npm run window\` (Edge app-mode) is again the default launch; the Electron
+  shell is opt-in.** Reverted \`scripts/window.mjs\` to the simple original launcher
   — dropped the dedicated Edge profile that had been added while chasing a browser
   taskbar icon (which is instead handled by the Electron shell). The native
-  Electron path (`npm run electron:dev`, with its WSLg GPU fix and window/taskbar
+  Electron path (\`npm run electron:dev\`, with its WSLg GPU fix and window/taskbar
   icon) stays available but is only launched when native/WSL2 is explicitly
   requested.
 
@@ -502,12 +502,12 @@ _Nothing yet._
 ### Fixed
 
 - **Smooth scrolling in the Electron shell under WSLg.** Chromium's default GL
-  backend fails to initialize against WSLg's virtual GPU (`/dev/dxg`, Mesa's
-  `d3d12` driver) and silently falls back to CPU/software rendering, which makes
-  scrolling and compositing janky. `electron/main.cjs` now detects WSL and routes
-  GL through **ANGLE→GL** (`--use-gl=angle --use-angle=gl --ignore-gpu-blocklist`),
+  backend fails to initialize against WSLg's virtual GPU (\`/dev/dxg\`, Mesa's
+  \`d3d12\` driver) and silently falls back to CPU/software rendering, which makes
+  scrolling and compositing janky. \`electron/main.cjs\` now detects WSL and routes
+  GL through **ANGLE→GL** (\`--use-gl=angle --use-angle=gl --ignore-gpu-blocklist\`),
   which uses the vGPU and restores hardware-accelerated rendering — so
-  `npm run electron:dev` no longer needs `--disable-gpu`. The switch is gated to
+  \`npm run electron:dev\` no longer needs \`--disable-gpu\`. The switch is gated to
   WSL only, so native Linux, Windows, and macOS builds keep their default
   (optimal) GPU path.
 
@@ -516,11 +516,11 @@ _Nothing yet._
 ### Changed
 
 - **The UI icons are now colored, and better centered.** The pictographic
-  `UiIcon`s (crate, factory, smelter, gear, sensor, build, plug, bolt, trash,
+  \`UiIcon\`s (crate, factory, smelter, gear, sensor, build, plug, bolt, trash,
   lock, bug, hourglass, pickaxe, wrench) are redrawn as two-tone shapes on the
   game's warm palette — a 3D orange crate, a yellow power bolt, a red ladybug for
   cheats, etc. — instead of flat single-color line marks. Control glyphs
-  (chevrons, check, close, crosshair) stay subtle and inherit `currentColor`. The
+  (chevrons, check, close, crosshair) stay subtle and inherit \`currentColor\`. The
   gear was also rebuilt from symmetric rotated teeth (the old hand-drawn one was
   lopsided), and the Options button now flex-centers its icon so it sits square
   with the label.
@@ -535,8 +535,8 @@ _Nothing yet._
   as a UI glyph (📦 drop pod, 🏭 factory, 🔥 smelter, 📡 sensor, 🏗️ build, 🔌
   powerline, ⚡ power, 🗑 destroy, 🔒 locked, 🐞 cheats, ⏳ saving, ⛏ mining, plus
   the ⚙ gear, ⌖ recenter, ▾▸ chevrons, ✓ checks and ✕ closes) is now a hand-drawn
-  inline SVG in a new `src/components/UiIcon.tsx` (`<UiIcon name="…" />`). Icons use
-  `currentColor`, so each inherits its surrounding text color. **Why it matters:**
+  inline SVG in a new \`src/components/UiIcon.tsx\` (\`<UiIcon name="…" />\`). Icons use
+  \`currentColor\`, so each inherits its surrounding text color. **Why it matters:**
   the shipped Electron build targets Windows *and* Linux, and the Linux runtime has
   no color-emoji font — so emoji rendered as tofu boxes (e.g. the Drop Pod). SVGs
   are font-independent and render identically on every platform. Added a project
@@ -547,26 +547,26 @@ _Nothing yet._
 ### Changed
 
 - **The Electron shell is now the icon-bearing, cross-platform desktop app.** The
-  `BrowserWindow` picks a per-OS window icon (`favicon.ico` on Windows,
-  `icon-512.png` on Linux/WSLg) and sets an explicit Windows AppUserModelID, so the
+  \`BrowserWindow\` picks a per-OS window icon (\`favicon.ico\` on Windows,
+  \`icon-512.png\` on Linux/WSLg) and sets an explicit Windows AppUserModelID, so the
   game shows its own taskbar icon rather than a generic host icon. Added an
-  `electron-builder` `build` config (`package.json`) with per-OS packaging icons
+  \`electron-builder\` \`build\` config (\`package.json\`) with per-OS packaging icons
   for future Windows/Linux distributables. (Running the native shell needs the
-  Linux GUI libs — `libnss3 libnspr4 libasound2t64` — installed once.)
+  Linux GUI libs — \`libnss3 libnspr4 libasound2t64\` — installed once.)
 
 ## [0.5.3] — 2026-07-14
 
 ### Fixed
 
 - **The app icon now shows on the Windows taskbar, not just in the header.** A
-  Chromium `--app` window takes its taskbar icon from a raster `favicon.ico` and
+  Chromium \`--app\` window takes its taskbar icon from a raster \`favicon.ico\` and
   from having its own app identity — neither of which existed, so the taskbar
   showed the generic browser icon. Added a real multi-resolution
-  `public/favicon.ico` (16/32/48/64/256 px, rendered from the icon SVG), a web
-  app manifest (`public/manifest.webmanifest`) with 192/256/512 px icons, and
-  the matching `<link>` tags. `npm run window` now also launches the browser
-  with a **persistent, app-dedicated profile** (`--user-data-dir` under
-  `%LOCALAPPDATA%\Satisfidlery`), so the window is treated as its own app and
+  \`public/favicon.ico\` (16/32/48/64/256 px, rendered from the icon SVG), a web
+  app manifest (\`public/manifest.webmanifest\`) with 192/256/512 px icons, and
+  the matching \`<link>\` tags. \`npm run window\` now also launches the browser
+  with a **persistent, app-dedicated profile** (\`--user-data-dir\` under
+  \`%LOCALAPPDATA%\\Satisfidlery\`), so the window is treated as its own app and
   adopts the factory icon on the taskbar instead of grouping under Edge.
 
 ## [0.5.2] — 2026-07-14
@@ -574,12 +574,12 @@ _Nothing yet._
 ### Added
 
 - **A dedicated app icon — a factory & gear mark.** Satisfidlery now ships its
-  own icon (`src/assets/icon.svg`): an orange factory silhouette with twin
+  own icon (\`src/assets/icon.svg\`): an orange factory silhouette with twin
   smokestacks and a gear, on the game's dark-industrial rounded-square
   background. It appears both in the **window header** brand (replacing the bare
-  🏭 emoji) and, via a `<link rel="icon">` favicon (SVG + a 256×256 PNG
-  fallback), in the **OS taskbar** when the game is launched with `npm run
-  window`. The Electron shell also points its `BrowserWindow` `icon` at the same
+  🏭 emoji) and, via a \`<link rel="icon">\` favicon (SVG + a 256×256 PNG
+  fallback), in the **OS taskbar** when the game is launched with \`npm run
+  window\`. The Electron shell also points its \`BrowserWindow\` \`icon\` at the same
   PNG for the future Steam build.
 
   ![The new Satisfidlery app icon shown as a tile and in the window header](docs/images/changelog/v0.5.2-app-icon.png)
@@ -613,7 +613,7 @@ _Nothing yet._
 
   Under the hood, patches are generated deterministically from the world seed
   (like ore deposits) and only *regrowing* patches are stored in the save, so the
-  vast field costs nothing until you actually forage. Regrowth runs in `simulate()`
+  vast field costs nothing until you actually forage. Regrowth runs in \`simulate()\`
   (live and offline) without touching the inventory; foraging is the explicit
   action that moves leaves in.
 
@@ -621,7 +621,7 @@ _Nothing yet._
 
 ### Notes
 
-- Save format bumped to **v15** (adds `leafPatches`); older saves load
+- Save format bumped to **v15** (adds \`leafPatches\`); older saves load
   forward-tolerantly with an empty (all-full) field.
 
 ## [0.4.3] — 2026-07-14
@@ -683,23 +683,23 @@ _Nothing yet._
 
 - **New milestone: the Power Grid.** After the Equipment Workshop, submit iron
   rods and plates at the HUB to unlock **Cable** and the power-grid infrastructure.
-  Cable (`2 Wire → 1 Cable`) is craftable both in the **Constructor** and by hand
+  Cable (\`2 Wire → 1 Cable\`) is craftable both in the **Constructor** and by hand
   at the **HUB** — and the HUB now also hand-crafts the earlier Assembly-Line parts
   (Iron Plate, Iron Rod, Wire), so you can make them without a Constructor.
 - **Powerlines on the map.** A new **Powerline** map tool (alongside Build/Scan):
   enter it, click two grid nodes — buildings, the HUB, or power poles — to run a
   powerline between them. A run longer than the max segment length auto-inserts
-  **Power Pole MK1**s along the shortest terrain-avoiding path (reusing the A\*
+  **Power Pole MK1**s along the shortest terrain-avoiding path (reusing the A\\*
   router), so every hop stays within reach. Tap empty ground to drop a pole by
   hand; tap a line, or a pole's ✕, to remove it (with a refund). Buildings and the
   HUB host two powerlines each; poles host four, so the grid can daisy-chain.
   Powerlines and poles are drawn on the world map. This is structural for now —
   the electricity that flows through the grid comes in a later milestone. See
-  `docs/images/changelog/v0.4.0-power-grid.png`.
+  \`docs/images/changelog/v0.4.0-power-grid.png\`.
 
 ### Notes
 
-- Save format bumped to **v14** (adds `powerPoles`/`powerLines`); older saves load
+- Save format bumped to **v14** (adds \`powerPoles\`/\`powerLines\`); older saves load
   forward-tolerantly with empty power grids.
 
 ## [0.3.3] — 2026-07-14
@@ -742,9 +742,9 @@ _Nothing yet._
 
 - **Hover an item for a quick description.** Pointing at any filled slot raises a
   popover with the item's name, its category, a one-line blurb of what it is and
-  what it's for, and the current stack against its max (e.g. `Stack · 50 / 50`).
+  what it's for, and the current stack against its max (e.g. \`Stack · 50 / 50\`).
   Every item ships with its own description, authored alongside the item in
-  `content.ts`.
+  \`content.ts\`.
 
   ![The inventory grid with an Iron Ingot hover popover open and the Destroy bin below the slots](docs/images/changelog/v0.3.1-inventory-bin-popover.png)
 
@@ -758,7 +758,7 @@ _Nothing yet._
   stack to **100**, refined products (ingots, plates, rods, wire) to **50**, and a
   **Portable Miner** takes a whole slot on its own (equipment doesn't stack). Mine
   past a stack's cap and it spills into the next slot; the header shows how many
-  slots are in use (e.g. `12 / 24`).
+  slots are in use (e.g. \`12 / 24\`).
 
 - **Capacity actually bites, and nothing is ever lost.** When the grid is full,
   collecting from a source or a building takes only what fits and leaves the rest
@@ -837,3 +837,4 @@ _Nothing yet._
   _The customized avatar represents the player on the world map:_
 
   ![The customized avatar standing on the world map](docs/images/changelog/v0.2.0-avatar-on-map.png)
+`;export{e as default};
