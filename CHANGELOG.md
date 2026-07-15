@@ -18,6 +18,27 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.25.3] — 2026-07-15
+
+### Added
+
+- **The belt ghost snaps onto a nearby input.** While routing, when the cursor comes within
+  reach of a valid destination machine the ghost's end locks onto that machine's **input nub**
+  (the tip turns a bright green "locked-on" dot) and a tap there connects the belt — no more
+  hunting for a pixel-perfect click on the node. Nearest machine wins; the armed source is
+  excluded. (`nearestBeltDest` in `MapView.tsx`.)
+
+### Changed
+
+- **Curved belts now ease in and out of the machine faces.** A curved belt used to yank toward
+  its target the instant it left the output; it now runs a short straight lead out of the
+  **output** (and into the **input**) along the port's facing direction before it bends, so it
+  leaves and arrives flat against the machine — a smooth S instead of a kink at the port. Done
+  by injecting a lead anchor off each port into the spline (`curveLead`/`beltRenderAnchors`), so
+  built belts, the draw preview, and the riding items all follow the eased curve.
+
+  ![Two curved belts easing out of each machine's output and into the next machine's input in smooth S-curves](docs/images/changelog/v0.25.3-belt-curve-snap.png)
+
 ## [0.25.2] — 2026-07-15
 
 ### Fixed
