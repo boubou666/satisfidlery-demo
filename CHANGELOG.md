@@ -18,6 +18,23 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.25.5] — 2026-07-15
+
+### Changed
+
+- **Belts wrap around a machine with junctions instead of skimming its edge.** 0.25.4's simple
+  port lead still dragged the connecting leg across the destination's disc when a source sat
+  directly above (or behind) it. Now, when the two ports face away from each other, the router
+  inserts **junction points** and routes the belt properly around: it exits the output to the
+  right, drops into a clear corridor **between** the two machines (their vertical midpoint, or
+  just past them when they sit level), crosses the gap there, then comes back to enter the input
+  from the left. The result is a tidy rectangular wrap (a smooth rounded one for curved belts)
+  that never crosses a disc — in the built belt, the items riding it, and the live draw ghost.
+  Machines whose ports already face each other still get a clean direct belt. (`beltRenderAnchors`
+  in `MapView.tsx`.)
+
+  ![A curved belt from a miner stacked above a smelter wrapping around the disc through mid-gap junctions into the input](docs/images/changelog/v0.25.5-belt-wrap-junctions.png)
+
 ## [0.25.4] — 2026-07-15
 
 ### Fixed
