@@ -18,6 +18,57 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.22.0] — 2026-07-15
+
+### Changed
+
+- **Any belt source can now feed any automatable machine — mismatched items clog instead of
+  being blocked.** Previously a belt was refused unless the destination had *some* recipe that
+  accepted the source's output (e.g. Copper Ore → Constructor was disallowed). Now the link is
+  always allowed: the belt carries the items and, if the destination's **currently selected
+  recipe** doesn't consume them, they pile up at the far end (Satisfactory-style clogging)
+  until you switch the recipe. The confirm popover's blocking "doesn't accept…" error is
+  replaced by a non-blocking heads-up ("_…current recipe won't use this — it'll pile up on the
+  belt_") and the **Build belt** button is enabled. The engine already clogged on a recipe
+  mismatch; this removes the load-time gate so genuinely-unused items ride the belt too.
+
+### Added
+
+- **One belt per output port.** A machine can now run at most one outgoing belt per output
+  slot — a single-output machine (or a Miner Mk1, which has one output) is capped at a single
+  belt out. Trying to run a second is refused with "_That output already feeds a belt — one
+  belt per output._" (Destinations are unchanged — a machine's input can still merge several
+  belts.)
+
+![Belt to any machine, clogging warning](docs/images/changelog/v0.22.0-belt-any-clog.png)
+
+## [0.21.9] — 2026-07-15
+
+### Added
+
+- **A live "ghost" preview while routing a conveyor belt.** Once you arm a belt source, a
+  faint dashed segment now trails from the last placed point (the source, or the most recent
+  bend) to your cursor, so you can see exactly where the belt will run before you commit the
+  destination or drop a bend. It's fainter than the committed route with a softly pulsing tip
+  dot, and it disappears the moment you pick a destination (the real route to the machine takes
+  over). Implemented by tracking the pointer in world space on `onPointerMove` (skipped while
+  actively panning so the ghost doesn't chase the drag) and appending it as the draft's tail.
+
+![Belt ghost preview](docs/images/changelog/v0.21.9-belt-ghost-preview.png)
+
+## [0.21.8] — 2026-07-15
+
+### Fixed
+
+- **You can now pan the map while placing powerlines or conveyor belts.** In power/belt mode
+  the full-layer overlay SVG (`.map-powerlines` / `.map-belts`) had `pointer-events: auto` on
+  its root, so it swallowed every pointer-down across the whole map — and since those classes
+  are in the drag-to-pan exclusion list, dragging never started. The overlay root is now inert
+  (`pointer-events: none`) and only the thin per-line hit strokes (`.powerline-hit` /
+  `.belt-hit`, rendered only in those modes) opt back in, so dragging empty ground pans as
+  usual while a line can still be clicked to remove. Empty-ground taps still drop a pole / bend
+  a belt route. (No screenshot: it's an interaction change a still frame can't show.)
+
 ## [0.21.7] — 2026-07-15
 
 ### Changed
