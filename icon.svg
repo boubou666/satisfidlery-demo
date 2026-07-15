@@ -1,0 +1,44 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- dark-industrial rounded-square app background -->
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="#0f1116"/>
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="url(#g)"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b1f2a"/>
+      <stop offset="1" stop-color="#0d0f14"/>
+    </linearGradient>
+  </defs>
+
+  <!-- gear behind the factory (production motif) -->
+  <g fill="#c96a1f">
+    <path d="M256 92
+      l16 3 6 32 22 9 27-19 23 23-19 27 9 22 32 6 3 16-3 16-32 6-9 22 19 27-23 23-27-19-22 9-6 32-16 3-16-3-6-32-22-9-27 19-23-23 19-27-9-22-32-6-3-16 3-16 32-6 9-22-19-27 23-23 27 19 22-9 6-32z"/>
+  </g>
+  <circle cx="256" cy="256" r="70" fill="#0f1116"/>
+  <circle cx="256" cy="256" r="42" fill="#1b1f2a"/>
+
+  <!-- factory silhouette, orange -->
+  <g fill="#e88a34">
+    <!-- roof-stepped building body -->
+    <path d="M118 360
+      V292 l40 26 V266 l40 26 V240 l40 26 V214 l58 0 V360 Z"/>
+    <!-- twin smokestacks -->
+    <rect x="300" y="176" width="26" height="184"/>
+    <rect x="340" y="150" width="26" height="210"/>
+  </g>
+  <!-- smokestack caps -->
+  <g fill="#f4a94f">
+    <rect x="296" y="168" width="34" height="12" rx="3"/>
+    <rect x="336" y="142" width="34" height="12" rx="3"/>
+  </g>
+
+  <!-- rising smoke puffs -->
+  <g fill="#5a6072">
+    <circle cx="353" cy="120" r="15"/>
+    <circle cx="372" cy="104" r="11"/>
+    <circle cx="337" cy="106" r="9"/>
+  </g>
+
+  <!-- ground line -->
+  <rect x="96" y="360" width="320" height="16" rx="8" fill="#f4a94f"/>
+</svg>
