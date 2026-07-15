@@ -18,6 +18,38 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.27.2] — 2026-07-16
+
+### Changed
+
+- **Map POIs are world-sized and no longer cluster.** Buildings, deposits, miners and the HUB used
+  to hold a constant on-screen size and collapse into a "count bubble" when zoomed out. Now each is
+  a physical map object with a fixed WORLD size: it grows as you zoom in and shrinks as you zoom
+  out, and there's no clustering — every POI always draws at its own spot. Calibrated so the spawn
+  framing looks as it did before (see `MARKER_REF_ZOOM`); the player avatar still holds a constant
+  size so you can always find yourself.
+
+  ![World-sized map nodes with glued ports](docs/images/changelog/v0.27.2-world-sized-nodes.png)
+
+### Fixed
+
+- **Belt ports stay glued to their machine at every zoom.** Zoomed out, a machine's input/output
+  port nubs flew far off the disc (constant-size nubs scattered around a collapsed cluster badge).
+  Ports are now world-sized like the machine they sit on — and the belt geometry (nub anchors +
+  leads) matches — so they stay pinned to the disc and belts still plug in cleanly at any zoom.
+  (`portLayer` / `beltNubWorld` / `beltRenderAnchors` in `MapView.tsx` now size off `MARKER_REF_ZOOM`.)
+
+## [0.27.1] — 2026-07-16
+
+### Fixed
+
+- **Placement commits on the node you tap — no detour walk.** While placing (a Miner Mk1
+  especially), tapping a node ran the node's own tap handler, which just walked the player over to
+  it; you then had to tap empty ground for the ghost to actually commit. Now a node tap during
+  placement commits right there: a Miner Mk1 mounts onto the tapped ore node (when eligible), and a
+  building/HUB drops at the tapped node's spot — both gated to the build ring, and neither walks
+  you anywhere. (Placement branch added at the top of `onNode` in `MapView.tsx`.)
+
 ## [0.27.0] — 2026-07-16
 
 ### Added
