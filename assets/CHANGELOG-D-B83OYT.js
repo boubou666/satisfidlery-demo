@@ -18,6 +18,171 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.35.5] — 2026-07-17
+
+### Fixed
+
+- **The action bar covered the map's mode panels.** Entering belt mode put its panel — style
+  picker and all, including **Done** — underneath the WORLD/SOURCES/BUILDINGS/HUB keys, so the
+  mode was awkward to leave. A 0.35.0 regression: four map panels are anchored
+  \`position: absolute; left: 50%; bottom: 12px\`, which is precisely where the new bottom bar
+  landed. All four now clear it via \`--hud-bottom\`: belt mode, power mode, the power confirm,
+  and the claim button.
+
+  Not fixable with z-index, which is worth writing down: those panels live inside
+  \`.map-viewport\`, inside \`.stage\` at \`z-index: 0\`, so the action bar at \`z-index: 35\` is above
+  *every* layer the map owns no matter what they ask for. Bottom-anchored map chrome has to
+  subtract \`--hud-bottom\`, and the token now says so.
+
+  This was a gap in 0.35.0's z-index audit: the same class of bug was found and fixed for the
+  save toast and countdown (both \`bottom: 24px; left: 50%\`), but the audit went looking at
+  \`z-index\` values and never asked what else was parked at the bottom centre.
+
+## [0.35.4] — 2026-07-17
+
+### Changed
+
+- **The terrain is drawn on the GPU. Panning costs 25.70ms → 0.30ms at 1440×900 (~86×).**
+  The map looks *exactly* as it did — that is the whole point, and it's gated.
+  [\`docs/gpu-terrain.md\`](docs/gpu-terrain.md).
+
+  ![The world, painted by the WebGL2 terrain painter](docs/images/changelog/v0.35.4-gpu-terrain.png)
+
+  | viewport | CPU | GPU | terrain-only pan ceiling |
+  | --- | --- | --- | --- |
+  | 1440×900 | 25.70 ms | 0.30 ms | 39fps → far above 60 |
+  | 1920×1080 | 43.20 ms | 0.30 ms | 23fps → far above 60 |
+  | 2560×1440 | 77.70 ms | 0.40 ms | 13fps → far above 60 |
+
+  **Stage 3 turned out not to be the job this plan described.** The plan said "port
+  \`renderAmbient\` to a shader and delete \`AmbientField\`". Reading \`ambientfx.ts\` properly showed
+  that was wrong on both counts: the shore term is an iterative BFS dilation that is
+  deliberately *view-dependent*, and — more to the point — **the animation was never the cost**.
+  \`renderAmbient\` already skips every dry cell. The 25.70ms was \`biomeOf\` per cell inside
+  \`renderTerrainView\`, which produced the field as a side effect of painting.
+
+  So the overlay doesn't move at all. The GPU produces the **field** in a second pass at one
+  texel per terrain cell (~36× smaller than the viewport) and reads it back in **0.20ms**;
+  \`ambientFieldFromGpu\` hands that to the untouched CPU \`renderAmbient\`. The water is still
+  drawn by the same code, so ambient parity is free instead of being something to gate.
+
+  **What holds it honest.** The gate diffs CPU vs GPU over 11 views — every one of the ten
+  biomes, whole-island zoom to deep zoom, rivers included, nothing stubbed — plus the ambient
+  field cell-for-cell. **0 differing pixels, 0 differing cells**, on a real NVIDIA RTX 5070 Ti
+  as well as the software rasteriser. \`renderTerrainView\` stays as the WebGL2-less fallback and
+  as the source of truth for gameplay: \`pathfind\`/\`deposits\`/\`leaves\` are untouched, which is
+  exactly why parity is enforced — a pixel that renders as land but paths as water is the
+  failure this must never produce.
+
+  Save shape unchanged (still v28).
+
+## [0.35.3] — 2026-07-17
+
+### Added
+
+- **GPU terrain: the payoff, measured on real hardware — 62× to 194×.** Still groundwork (the
+  painter is unwired until stage 3), but the premise is no longer taken on faith.
+  \`scripts/gpu-bench.html\`, and [\`docs/gpu-terrain.md\`](docs/gpu-terrain.md).
+
+  | viewport | CPU (fp64) | GPU (df + 1px sync) | speedup |
+  | --- | --- | --- | --- |
+  | 1440×620 | 18.60 ms | 0.300 ms | **62×** |
+  | 1440×900 | 25.70 ms | 0.300 ms | **86×** |
+  | 1920×1080 | 43.20 ms | 0.300 ms | **144×** |
+  | 2560×1440 | 77.70 ms | 0.400 ms | **194×** |
+
+  **The parity gate also passes on a real NVIDIA RTX 5070 Ti**, not just the software
+  rasteriser it had been running on — which is the check that mattered, because the
+  double-float coordinates use Dekker's algorithms and those *require* the compiler not to
+  reassociate or contract to FMA. NVIDIA's compiler is far more aggressive than WARP's; the
+  shader survives both, with zero differing pixels on each.
+
+  **Correction to 0.35.1's numbers.** Those were measured in Node against a stubbed 2D context,
+  which charges nothing for \`fillStyle\` parsing or 36,000 \`fillRect\` calls — they were a floor,
+  and the real browser cost is ~50% higher: 25.70 ms at 1440×900 (not 16.78), 77.70 ms at 1440p
+  (not 45.58). So panning was **already over the 16.7 ms frame budget before 0.35.0** — 18.60 ms
+  in the old 620px box — and terrain alone caps the pan at ~39fps at 1440×900, ~23fps at 1080p,
+  ~13fps at 1440p.
+
+  Two measurement traps are documented in the bench, having caught both: \`--virtual-time-budget\`
+  freezes the clock during synchronous work (every timing reads 0.0 ms), and \`gl.finish()\` does
+  **not** force the render — Chrome elides work for a canvas that is never displayed or read,
+  which first reported an impossible 0.001 ms/frame (3.7 Tpixel/s, ~18× the card's theoretical
+  fillrate). \`readPixels\` forces it, at the cost of a stall that makes the GPU column an upper
+  bound.
+
+## [0.35.2] — 2026-07-17
+
+### Added
+
+- **GPU terrain, stage 2: rivers in the shader.** Still groundwork — the painter remains
+  unwired from \`MapView\`, and panning is exactly as slow as before (see below for why).
+  [\`docs/gpu-terrain.md\`](docs/gpu-terrain.md).
+
+  Rivers were the one part of the model that isn't noise: \`riverAt\` warps the query point by
+  fbm and then does a spatial-hash lookup against D8 line segments. It also can't be faked by
+  stroking segments onto a canvas afterwards, because the warp is **per-pixel** — the river's
+  shape *is* the segment set warped by a noise field. So the flow network now uploads as
+  textures: 695 segments as RGBA32F (2 texels each), the bucket map flattened to an RG32UI
+  (offset, count) grid over an R32UI index list, with per-bucket order preserved (\`riverAt\`
+  returns the *first* hit, and stage 3 will advect water along that segment's direction).
+
+  Two things rivers taught about precision, on top of stage 1's:
+
+  - Segment **endpoints** upload as plain fp32 and that's safe, unlike everything else at world
+    scale — they come off the D8 grid as \`(i+0.5) * (2*WORLD_RADIUS/N) - WORLD_RADIUS\`, needing
+    ~20 significand bits. It's the *query* point that can't be held in fp32.
+  - \`distToSeg\` must **not** subtract in fp32: \`q\` is ~50,000 and so is \`ax\`, but their
+    difference is tens of units, so an fp32 subtraction cancels catastrophically and leaves
+    ~0.006 of noise on a test whose threshold is a river half-width. The shader subtracts in
+    double-float, then collapses.
+
+  The gate now runs the **full model with nothing stubbed** — 11 views × 144,000 px, all ten
+  biomes, whole-island to deep zoom, **0 differing pixels**. The rivers-off stub that stage 1
+  needed is gone.
+
+  **Why this still isn't faster.** \`renderTerrainView\` doesn't only paint — it *produces* the
+  \`AmbientField\` that \`renderAmbient\` consumes, collected during the same per-cell pass. Wiring
+  the shader in now would leave the CPU running the identical \`elevation\` math to build that
+  field, for zero gain. The payoff needs stage 3 (the ambient overlay onto the same context),
+  which is the coupling this plan flagged from the start.
+
+## [0.35.1] — 2026-07-17
+
+### Added
+
+- **GPU terrain, stage 1: the WebGL2 painter and its parity gate.** Groundwork only — nothing
+  in the shipped render path changed, and the shader is deliberately **not** wired into
+  \`MapView\` (without rivers it isn't the same picture). Plan and measurements in
+  [\`docs/gpu-terrain.md\`](docs/gpu-terrain.md).
+
+  Panning re-renders the whole viewport on the CPU every camera move, and 95% of that is
+  \`model.elevation\` — ~9 octaves of domain-warped fbm per 6px cell. Measured: 12.75ms in the
+  old 620px box, 16.78ms at 1440×900, 26.21ms at 1080p, 45.58ms at 1440p, against a 16.7ms
+  frame. So the pan was already at ~76% of budget before 0.35.0 went full-bleed; the shell
+  pushed it over. Micro-optimising the loop is worth ~1ms of ~17ms and was not done.
+
+  \`terrainGpuShader.ts\` + \`terrainGpu.ts\` now render everything but rivers in WebGL2,
+  **pixel-for-pixel identical to \`renderTerrainView\`** across all ten biomes and from
+  whole-island zoom to deep zoom — 0 differing pixels in 9 views × 144,000 px. Run the gate
+  with \`npm run dev\` → \`/scripts/parity-gate.html\`.
+
+  The interesting part is *why the shader can't mirror the JS*. JS computes in fp64, GLSL in
+  fp32, and the world is ±50,000 units across — where an fp32 ulp is ~0.006 world units, so a
+  shader doing \`wx = ox + px*worldPerPx\` cannot even address a position accurately enough.
+  That is invisible in the noise (which is continuous, so its 9e-7 error self-heals at cell
+  boundaries) but brutal in \`hash2(floor(wx/11), …)\`, a discontinuous per-cell hash: measured,
+  a naive port flickers a **full-width band on ~13% of panned frames**. Coordinates are
+  therefore carried as double-float hi/lo pairs (the Cesium/deck.gl trick) and only collapse to
+  fp32 where the value feeds something continuous. \`render-plan.md\`'s claim that \`noise.ts\`
+  "translates almost verbatim" is wrong, and is now corrected.
+
+  \`terrain.ts\` gains \`POIS\`/\`POI_RADIUS\` exports and raw \`oceanGrid\`/\`carveGrid\` on the model
+  (the two parts that are a flood fill, not noise, and so must be uploaded as textures). The
+  CPU model stays the source of truth for gameplay — \`pathfind\`/\`deposits\`/\`leaves\` are
+  untouched — which is exactly why parity is gated rather than eyeballed: a pixel that renders
+  as land but paths as water is the failure this must never produce.
+
 ## [0.35.0] — 2026-07-17
 
 ### Changed
