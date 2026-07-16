@@ -18,7 +18,18 @@ before this file is in the git log.
 
 _Nothing yet._
 
-## [0.31.0] — 2026-07-16
+## [0.31.1] — 2026-07-16
+
+### Fixed
+
+- **Water no longer desyncs from the terrain when you pan fast.** The two map canvases were
+  painted on different clocks: terrain repainted every frame as the camera moved, while the
+  water overlay animated on its own slower ambient loop (20fps) using the field from whichever
+  camera it last saw. Panning slowly hid it, but a fast flick left the overlay a frame or two
+  behind — long enough to drag shoreline foam and river streaks off the water and onto the
+  land. A camera move now repaints the water in the **same frame** as the terrain it belongs
+  to; the ambient loop only supplies motion between camera moves. Measured over a fast drag,
+  lit water pixels landing on land went from **89% average (100% worst) to 0%**.
 
 ### Added
 
