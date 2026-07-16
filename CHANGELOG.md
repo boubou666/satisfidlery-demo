@@ -18,6 +18,112 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.32.0] — 2026-07-16
+
+### Added
+
+- **The world has weather: wind blows the land, clouds cross the map.** Rivers already ran
+  downhill and the sea already shimmered, but everything that wasn't water sat perfectly
+  still — which made the water look less like life and more like the one animated thing.
+  Now the land moves too, and a passing cloud dims it all.
+
+  Every world gets a **wind** (`wind.ts`): one global vector, fixed per seed, plus a gust
+  field drifting downwind. Everything ambient shares it, which is what makes it read as one
+  weather system rather than three animations playing at once:
+
+  - **Canopy shimmer** — the river-flow treatment aimed along the wind instead of downhill.
+    Jungle catches the most light, then forest, then grass, then sand. Gusts arrive in waves
+    that cross the map, so the trees don't rustle at one uniform rate forever. Bare rock and
+    snow stay still — nothing up there to blow around.
+  - **Cloud shadows** — low-frequency blobs drifting downwind over land *and* sea, painted
+    last so a cloud dims the glints underneath it. They hold on at zoom levels where surface
+    detail has already faded, though they're subtle from the far island overview.
+
+  Two constraints shaped this. **The wind can't turn**: with no state to integrate into, a
+  stateless effect offsets by `direction × speed × t`, so a direction that drifts even
+  slightly swings a lever that grows without bound — an hour in, a 0.01rad turn would lurch
+  the whole pattern a thousand world units sideways. Direction and speed are constant per
+  seed and all the variation lives in the gusts, which is what you perceive as wind anyway.
+  And **clouds cover every cell**, unlike water, which skips most of the screen — so they
+  render to a quarter-scale buffer and get scaled back up. At ~900 world units a cloud is so
+  low-frequency that the bilinear blur is indistinguishable from the real thing, at 1/16 the
+  samples. The map still holds 60 FPS.
+
+  `waterfx.ts` is now `ambientfx.ts` and its `WaterField` an `AmbientField` (the terrain pass
+  now tags wind-catching land in the same sweep it already made), and the overlay canvas is
+  `.map-ambient`. The layer stopped being about water.
+
+![Cloud shadows and wind-blown land on the world map](docs/images/changelog/0.32.0-wind-clouds.png)
+
+## [0.31.4] — 2026-07-16
+
+### Added
+
+- **FPS counter in the map's bottom-left corner.** The map now runs several things per frame —
+  the terrain repaint, the animated water overlay, the belt-item canvas — and there was no way
+  to see what that costs while playing. A small readout, pinned opposite the zoom controls,
+  samples the frame rate twice a second.
+
+  It counts `requestAnimationFrame` callbacks and writes the number straight into its own DOM
+  node rather than going through React state, so watching the frame rate can't itself re-render
+  the map and skew what it's measuring. It's inert to pointers, so it never eats a map click.
+
+![The FPS counter in the corner of the world map](docs/images/changelog/0.31.4-fps-counter.png)
+
+## [0.31.3] — 2026-07-16
+
+### Fixed
+
+- **90° belts take one corner instead of three.** A run between two machines whose ports face
+  different axes — say an east-facing output feeding a north-facing input — used to turn out of
+  the output almost immediately, run the long way along the other axis, then turn back into the
+  input. Three corners where the shape only needs one.
+
+  Each leg of an angled route picked its corner by whichever delta was larger, in isolation, with
+  no idea which way the belt was already travelling: if the drop happened to be longer than the
+  reach, it turned south first and had to turn back. A leg now leaves along the axis it *arrived*
+  on and lands on the axis the next leg *leaves* on, so the turn falls where the two runs
+  actually cross and the corners at the joins disappear. The port leads are what carry the
+  facings in. Where both ports face the same axis an L genuinely can't honour both (that needs a
+  Z), so those fall back to the old rule and are unchanged.
+
+  Both shapes are the same **length** — `|Δx| + |Δy|` whichever way an L turns — so cost, transit
+  time and the stored route are untouched, and existing belts simply redraw with the better
+  corner.
+
+![A 90° belt taking a single corner](docs/images/changelog/0.31.3-belt-90-corner.png)
+
+## [0.31.2] — 2026-07-16
+
+### Changed
+
+- **The map's belts, wires and ports now draw on canvas instead of the DOM.** Nothing looks or
+  behaves differently — that was the whole point — but the map no longer builds a DOM node per
+  item riding a belt. Each item used to cost **three** nodes (`.map-marker-pos` >
+  `.belt-item-inner` > `<img>`), each with its own transform and CSS transition. At a
+  genre-normal endgame (~100 belts × ~20 items) that is ~6,000 nodes reconciled and composited
+  every frame — a wall the game would have hit well before factories got as big as it's designed
+  to support. Each item is now a single `drawImage` from a pre-baked sprite.
+
+  Moved: powerline wires, belt bands, the scrolling belt surface, bend discs, ports, and the
+  riding items. **Deliberately not moved:** every labelled, clickable node (HUB, sources,
+  buildings, deposits, poles, leaves). They carry i18n text, `title=` tooltips, keyboard focus
+  and ~30 aria roles between them, their count scales with buildings placed rather than with
+  throughput, and they only change on a state change — so canvas would cost all of that to fix a
+  bottleneck they don't have.
+
+  It takes two canvases, because the layer straddles the markers and the old z-order had to
+  survive exactly: wires and tracks pass *under* the machines, ports and items *over* them. The
+  avatar moved to its own layer above both, keeping it on top of the items as before. Things the
+  DOM was doing for free are now done by hand: the 10fps→60fps tween between tick positions (the
+  compositor's `transition: transform`), the belt surface's scroll (a CSS keyframe, re-derived
+  from the clock so it still matches item speed exactly), the "this one goes" red highlight and
+  pointer cursor on hover (CSS `:hover` + a sibling selector), and click-to-remove for belts and
+  wires (fat transparent SVG hit-strokes → mode-gated point-to-polyline hit tests).
+
+  No save change, no engine change — `src/game/` is untouched. Design notes and the full
+  rationale (including why *not* Unity) are in [`docs/render-plan.md`](docs/render-plan.md).
+
 ## [0.31.1] — 2026-07-16
 
 ### Fixed
