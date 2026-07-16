@@ -18,6 +18,39 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.34.0] — 2026-07-16
+
+### Changed
+
+- **The build radial has submenus.** The top level is now four categories — Extraction,
+  Production, Power, Logistics — and picking one swaps the ring to that category's buildings.
+  The core becomes the way back out.
+
+  ![Build categories on the map radial](docs/images/changelog/v0.34.0-build-categories.png)
+
+  This is a fix for a problem the game doesn't have yet. One flat ring worked at five
+  buildings and would have kept working at six; at a dozen it becomes a wall of discs with
+  labels colliding, and the failure is gradual enough that there's never an obvious day to
+  fix it. The ring's node count is now flat no matter how much content lands on it — adding
+  a building means picking a category in \`content.ts\`, and the menu absorbs it.
+
+  ![The Production submenu](docs/images/changelog/v0.34.0-production-submenu.png)
+
+  **Categories are a player-facing answer to "what am I trying to do?", not an engine
+  concept** — nothing in \`simulate()\` reads \`category\`. That's deliberate: the taxonomy is
+  free to be re-cut whenever the content says it should be, without touching game logic.
+
+  The honest cost, today: only Production holds more than one building, so Extraction, Power,
+  and Logistics each wrap a single item and cost a click they don't yet earn. That's accepted
+  on purpose. **Category positions stay put as content unlocks** — a node that moves once its
+  category grows would trade a permanent muscle-memory tax for a temporary click, and the
+  categories fill out as buildings land. Only unlocked categories get a node, so the early
+  game shows one, not four dead ends.
+
+  The HUB stays a top-level node rather than living in a category: it's a one-off relocation
+  of a building you already own, not a thing you build, and it only appears at all while it's
+  dismantled.
+
 ## [0.33.0] — 2026-07-16
 
 ### Added
