@@ -18,6 +18,53 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.30.0] — 2026-07-16
+
+### Added
+
+- **Split a stack — in any inventory.** Right-click a stack in the player inventory or a
+  Storage grid to open a split popover: a slider picks any amount from 1 up to the full
+  stack, a **Half** button jumps straight to half (the default), and **Split** moves the
+  chosen amount into the grid's first empty slot as its own pile. A split never merges into
+  other stacks of the same item (that's what drag-merge is for) and never destroys anything:
+  with no free slot the popover says so and the Split button is disabled. Storage splits are
+  reach-gated like every other Storage interaction, the slider clamps live if the stack
+  shrinks underneath it (belt-drained, crafted from), and Escape / clicking elsewhere cancels.
+  The engine side is a pure \`splitSlot\` helper next to the existing grid math, exercised by
+  both new store actions.
+
+![The split popover open on an iron-ore stack, slider at half](docs/images/changelog/v0.30.0-stack-split.png)
+
+## [0.29.1] — 2026-07-16
+
+### Changed
+
+- **Powerlines and belts now have a maximum run length (2 500 m).** Neither had any distance
+  check at all: two clicks could string a wire — or run a belt — clear across the world
+  (100 km), auto-raising ~140 power poles from wherever you happened to be standing. A single
+  run is now capped, measured along the **routed** path, so a wire that detours around a
+  mountain and a belt drawn with bends are both judged on the length they actually are, not
+  their straight-line gap. The cap is deliberately loose (~10× build reach, ~2.8× the default
+  view span), so everyday factory wiring never touches it — a full-length belt is a ~31 s ride
+  costing ~21 iron plates. To cross a longer gap, chain runs: end a powerline on a pole and
+  start the next from it, or hop a belt through a machine or a Storage. Hand-routed powerlines
+  are capped on the **sum** of their hops, so dropping a waypoint every 2 500 m can't walk a
+  wire across the map one legal hop at a time. Over-long runs are refused with a "Too far" note
+  in the confirm popover and cost nothing.
+
+### Fixed
+
+- **Storage now shows its crate icon on the map instead of a generic gear.** The map node
+  picked its icon by the building's current recipe output, falling back to a gear when there
+  wasn't one — so Storage, whose whole point is that it runs no recipe, was guaranteed to hit
+  the fallback. The crate icon and its mapping already existed and were simply never consulted
+  for non-generator buildings. Also fixes Smelters and Constructors showing the same gear
+  before a recipe is picked.
+
+![Storage buildings showing their crate icon on the map](docs/images/changelog/v0.29.1-storage-icon.png)
+
+![An over-long belt refused with a Too far note](docs/images/changelog/v0.29.1-run-cap.png)
+
 ## [0.29.0] — 2026-07-16
 
 ### Added
