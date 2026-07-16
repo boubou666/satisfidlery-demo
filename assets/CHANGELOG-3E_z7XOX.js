@@ -18,6 +18,31 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.31.0] — 2026-07-16
+
+### Added
+
+- **Living water.** The map's water is no longer a flat fill — it moves. **Rivers flow**:
+  highlight streaks drift *downstream*, following the real per-seed D8 flow network the
+  terrain already routes downhill, so every watercourse visibly runs toward the sea. **Seas
+  and lakes shimmer**: two fine noise fields drift at different rates and are multiplied
+  together, so a glint appears only where both peak — the surface twinkles in place instead
+  of sliding as one sheet. **Coastlines foam**: a pulse rolls along the land edge, brightest
+  on the cells that touch shore and fading out over the next two.
+
+  The effect **fades out as you zoom out**. Surface detail is a close-up cue: held at full
+  strength on the map overview it stopped reading as water and turned the ocean to grey fog
+  with a glowing halo around every coast, so it now fades to clean flat water by the time the
+  island fits on screen. It also honours \`prefers-reduced-motion\` (overlay off, no frames
+  burned), and pauses on a hidden tab.
+
+  Cosmetic only — no game state, no save change. It rides on its own \`.map-water\` canvas over
+  the terrain, so ambient motion never triggers a terrain repaint; the terrain pass hands it
+  the visible water cells (kind, flow direction, distance to shore) as it paints, and the
+  overlay animates just those at 20fps.
+
+![Rivers flowing on the world map](docs/images/changelog/0.31.0-water.png)
+
 ## [0.30.0] — 2026-07-16
 
 ### Added
