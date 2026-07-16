@@ -18,6 +18,64 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.35.0] — 2026-07-17
+
+### Changed
+
+- **The game looks like a game now, not a website.** The world was a 620px box parked in a
+  centred 1180px document column, under a site header and a row of underlined tabs, and the
+  whole app ran on `system-ui` — the player's OS font. `docs/render-plan.md` called this
+  correctly when the renderer work finished: HUD/world cohesion is an *art-direction*
+  problem, not a rendering one. This is that pass. No engine, store, or save change — the
+  save version is untouched at v28.
+
+  ![The HUB plated over the full-bleed world](docs/images/changelog/v0.35.0-game-shell.png)
+
+  **The world is the screen.** `.app` is `position: fixed; inset: 0`; the map fills the
+  window edge to edge. The HUD strip and the action bar *overlay* it rather than taking
+  layout rows, so the terrain runs under them to the glass. Sources, Buildings and the HUB
+  are now panels floating over the live world; the tabs became a bottom bar of chunky
+  chamfered console keys. MapView already measured itself with a `ResizeObserver`, so it
+  adapted to all of this for free.
+
+  **The camera survives now.** Because the map stays mounted for the whole session instead
+  of being swapped out per tab, the world no longer jumps back to the avatar every time you
+  glance at Sources — its `view` was local state that re-centred on mount. Verified by
+  comparing `.map-world`'s transform matrix across a tab switch: byte-identical. The
+  animated layers take a `covered` flag and stop painting behind an opaque panel, extending
+  the `document.hidden` guard the rAF loops already had.
+
+  **Typography.** Chakra Petch for the HUD voice (headings, keys, and every number, with
+  tabular numerals so live counters stop jittering) and Barlow for prose. Both self-hosted
+  via `@fontsource` and bundled — a Google Fonts link would silently fall back to the OS
+  font in the shipped Electron build, which has no network. Latin-only subsets: our locales
+  are en/fr/mando and every French accent is in `latin`, which took the font payload from
+  608 kB to 132 kB.
+
+  **Material.** Panels are plates, not cards: chamfered corners via `clip-path` (rounded
+  rectangles are what every website already looks like), lit from above, with a hard base
+  edge and a real cast shadow. Panel bodies are recessed *darker* than the cards inside them
+  so the plates read. All 21 `border-radius: 999px` pills became hard tags, every card and
+  button radius dropped to 3px, buttons gained a bevel and travel on press, and the iOS
+  toggle in Options became a rocker sliding in a cut slot.
+
+### Fixed
+
+- **Options and the offline summary opened *behind* the HUD.** `.modal-backdrop` sat at
+  `z-index: 10` — above the old document flow, but below the new floating panels (30) and
+  action bar (35). Modals now sit at 80, and the z-index scale for the whole shell is
+  written down at that rule. The save toast and countdown had the same class of bug: both
+  are `position: fixed; bottom: 24px; left: 50%`, which is exactly where the action bar now
+  lives, and both were behind it.
+
+- **A building's input row printed its buffer text over its own buttons in French.**
+  `.io-slot-body` had `flex-basis: 120px` with `white-space: nowrap` and no `overflow`, so
+  it shrank below its own text and the excess painted across the neighbouring key —
+  measured at 126px wide holding 172px of text. Latent for as long as the rule existed;
+  English "35 / 500 Iron Ore" fits where French "35 / 500 Minerai de fer" does not, and
+  uppercasing the buttons in this pass was what finally pushed it over. Basis is `auto` now,
+  so the row wraps instead of squeezing, with `overflow: hidden` as a backstop.
+
 ## [0.34.1] — 2026-07-16
 
 ### Fixed
