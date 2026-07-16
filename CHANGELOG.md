@@ -18,6 +18,44 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.29.0] — 2026-07-16
+
+### Added
+
+- **Storage buildings — a 30-stack warehouse.** A new placeable building (unlocked with the
+  Conveyor Logistics milestone, built from 10 iron plate + 10 iron rod) that holds up to **30
+  stacks of any items** in its own slot grid. Open it — from the map node popover when you're
+  standing close enough, or the Buildings tab — to swap items with your inventory by
+  **drag-and-drop** (a stack in, a stack out). **Belts** feed and drain it automatically: an
+  incoming belt first-fits any item into the grid; an outgoing belt delivers the **most
+  top-left stack** first, and backs up when the warehouse is full. It needs **no power** (so
+  it's never a powerline endpoint), runs no recipe, and refunds its whole stockpile when
+  dismantled.
+- **Quick Sort.** A one-click button that merges every stack of the same item, orders them
+  (ores first, then products), and packs them top-left — on **both** the Storage grid and the
+  **player inventory** (a new sort button in the inventory header).
+
+![Storage building with a filled grid and Quick Sort](docs/images/changelog/v0.29.0-storage.png)
+
+## [0.28.1] — 2026-07-16
+
+### Added
+
+- **An "Entity Codex" wiki that documents every entity in the game.** A standalone,
+  game-styled reference page at `docs/wiki/index.html` — a self-contained HTML file (all
+  CSS and item art inlined) that opens on its own in a browser and is **not** part of the
+  game bundle or the Vite build. It catalogs every content entity (items, source qualities,
+  mining specs, buildings, all machine recipes, HUB hand-crafts, miners, the power grid,
+  conveyor belts, the milestone chain, the drop pod, deposits/scanning, avatar parts) with
+  all of its data, plus a field-by-field reference for every runtime state shape in
+  `types.ts` (`GameState`, `Source`, `Building`, the belt/power entities, `BurnerBank`, the
+  sensor, player/leaves, and the rest) and the `config.ts` tunables they cite. Styled with
+  the game's own palette (Satisfactory orange on the dark panel theme), the real item SVG
+  icons, and the poor/normal/pure quality pills. It's a hand-maintained snapshot of v0.28.0
+  content — the TS modules stay the source of truth.
+
+  ![The Entity Codex: a game-styled reference wiki with a sticky table of contents, the items table with real icons and colored accents, and quality pills](docs/images/changelog/v0.28.1-entity-codex-wiki.png)
+
 ## [0.28.0] — 2026-07-16
 
 ### Added
