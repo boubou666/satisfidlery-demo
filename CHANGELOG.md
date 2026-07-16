@@ -18,6 +18,28 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.34.1] — 2026-07-16
+
+### Fixed
+
+- **Build-radial labels no longer crowd the core.** A node's label and cost floated below
+  its disc no matter where on the ring it sat — so for a node on the ring's *top*, the text
+  grew back toward the middle. The Miner Mk1 is the worst case and the one you actually hit:
+  it sits alone at the top of the Extraction ring, and its three-line cost (1 Portable Miner,
+  10 Iron Plate, 10 Concrete) landed straight across the back button.
+
+  ![The Miner Mk1's cost clear of the core](docs/images/changelog/v0.34.1-label-outward.png)
+
+  The text now floats on the node's **outward** side — below the disc on the lower half of
+  the ring, above it on the upper half — so it always grows away from the centre. That's a
+  property of the geometry rather than a nudge: it holds for any node count and any cost
+  length, instead of being tuned until the labels we have today happen to fit. The HUB's cost
+  line, which was also grazing the core at the top of the categories ring, is fixed by the
+  same rule.
+
+  Reading order stays name-then-cost on both halves; up top the cost simply ends up as the
+  line nearest its disc.
+
 ## [0.34.0] — 2026-07-16
 
 ### Changed
