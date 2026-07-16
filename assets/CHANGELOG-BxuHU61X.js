@@ -18,6 +18,119 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.33.0] — 2026-07-16
+
+### Added
+
+- **Working machines smoke.** Furnaces and burners now trail a plume downwind while they're
+  actually doing something — and go quiet the moment they aren't.
+
+  This is the effect the canopy shimmer wanted to be and couldn't: it has a **subject**. Nobody
+  has to be told what a plume trailing off a furnace is, so the map can say "combustion happens
+  here" without drawing a single chimney. It drifts along the same \`wind.ts\` vector the clouds
+  use, so the world has one weather system rather than two opinions about the wind.
+
+  It's cosmetic, but it's cosmetics carrying real information: **a plume means that machine is
+  turning a cycle right now.** A smelter whose input buffer ran dry, a burner out of leaves, a
+  grid that tripped — each stops smoking, so you can read your factory's health from across the
+  map without opening a panel. That honesty is structural, not a promise: the plume asks the
+  engine's own \`buildingWorking\` / \`buildingGenerating\` — the very predicates that decide whether
+  a machine draws power — so the smoke and the kW readout cannot drift apart.
+
+  Which machines have a stack is one flag in \`content.ts\` (\`smokes\`), set on the Smelter and the
+  Biomass Burner, plus the HUB's own burner bank — the first thing in the game that burns, so the
+  first thing that smokes. Not the Constructor, not a Storage: only machines that plausibly burn
+  something, or the map starts lying.
+
+  Puffs are sized in the same design px as the machine discs and scaled with them, so a plume
+  stays pinned to its stack at every zoom and inherits the discs' own sanity — no repeat of the
+  canopy's grow-without-bound trap. They fade out when a machine shrinks to a dot, and the
+  throttle eases over ~a second so a stopping machine's plume thins and dies instead of blinking
+  out mid-frame.
+
+![Smoke trailing from the HUB burners and a working smelter](docs/images/changelog/0.33.0-machine-smoke.png)
+
+## [0.32.3] — 2026-07-16
+
+### Removed
+
+- **The canopy shimmer is gone.** It never read as wind in trees. It read as clouds — to
+  everyone who looked at it, including while knowing a wind feature had just shipped.
+
+  That isn't a tuning failure, which is why 0.32.2's clamp made it smaller without making it
+  *right*. The map draws no trees: forest and jungle are flat darker-green fills, with no
+  crowns or silhouettes that could plausibly sway. Modulate the brightness of a flat fill with
+  a soft drifting field and there is exactly one thing a viewer can read it as — light and
+  shade moving over the ground. A cloud. The effect worked perfectly; the job was wrong. Worse,
+  it spoke the same visual language as the real cloud layer, so the map had two things saying
+  "cloud" and only one of them was.
+
+  The water is the contrast that proves it: water genuinely *is* reflective, the biome colour
+  already says "water", and rivers carry real direction from the D8 flow field, so a glint on
+  blue reads as a glint. There's a signifier for the effect to attach to. The land had none.
+
+  Kept: the wind (\`wind.ts\`) still drives the clouds and is what burner smoke will want; the
+  clouds themselves were innocent throughout and are unchanged. The "floor is not a ceiling"
+  lesson from 0.32.2 stays as a note in \`ambientfx.ts\` — it's a real trap for the next effect
+  sized in world units. Dropping the land pass also restores the overlay's cheapest property:
+  it skips every cell that isn't wet, which is most of the screen.
+
+  If living forests come back, they start with canopy *art* — seeded, static, stippled tree
+  crowns in the terrain pass — and only then does wind get to move them.
+
+![Still ground, moving water at play zoom](docs/images/changelog/0.32.3-still-ground.png)
+
+## [0.32.2] — 2026-07-16
+
+### Fixed
+
+- **The "clouds" you could see from the ground were never clouds.** They were the canopy
+  shimmer, and the fix in 0.32.1 moved the wrong layer.
+
+  Nothing bounded these effects in *screen* space. A feature sized purely in world units
+  grows without limit as the camera drops: the gust field, at 1400 world units, was **965px
+  at play zoom** — wider than the map itself. So instead of gusts travelling across the trees
+  you got one slow, soft, screen-sized swell of brightness drifting over everything, which is
+  an extremely good impression of a cloud shadow. The canopy wave did the same thing more
+  quietly, reaching 372px at the closest zoom — a third of the screen for something meant to
+  read as leaves.
+
+  Both are now clamped at **both** ends in screen px, not just floored: never finer than the
+  floor when you pull back, never coarser than the ceiling when you push in. Gust cells cap
+  at 260px and canopy waves at 70px, so close to the ground you get fine leaf texture rustling
+  in gusts you can actually watch travel, instead of a mass of brightness sitting on the
+  factory you're trying to look at. Gust drift is now expressed in feature-lengths per second
+  like every other speed here, so gusts cross the screen at the same apparent rate at any zoom.
+
+  Clouds themselves were innocent and are unchanged — they remain an altitude effect, and were
+  measured to contribute a maximum of 1/255 per channel at play zoom.
+
+![Leaf-scale shimmer at play zoom](docs/images/changelog/0.32.2-leaf-scale-shimmer.png)
+
+## [0.32.1] — 2026-07-16
+
+### Changed
+
+- **Clouds are a thing you see from altitude.** Zoom now reads as height. Down at the working
+  zoom you're on the ground among the machines — under the weather rather than looking down on
+  it — and a shadow sliding over the belt you're routing is clutter on top of the thing you're
+  actually trying to see. So the clouds are gone down there. Pull back and they arrive, which
+  is where you'd see them from anyway.
+
+  This inverts the fade they shipped with yesterday. It also means the two halves of the
+  overlay now hand off cleanly: close in you get the texture of the ground (canopy shimmer,
+  glints, foam), far out that dissolves and you get the weather over it instead. Neither ever
+  competes with the other for the same pixels. Clouds now cost nothing at all at play zoom —
+  the pass early-returns before touching a cell.
+
+  Since altitude is the only place clouds live now, they had to actually read there, and at
+  the old strength they didn't. Shadows are darker (0.2 → 0.35) and bigger (a 70px floor on
+  screen → 120px). They're unmistakable over open sea; over land they stay subtler, because
+  the terrain's own per-cell jitter is sub-pixel speckle at that zoom and a soft shadow hides
+  in noise. Still 60 FPS.
+
+![Cloud shadows over the sea, seen from altitude](docs/images/changelog/0.32.1-clouds-at-altitude.png)
+
 ## [0.32.0] — 2026-07-16
 
 ### Added
