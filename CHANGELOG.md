@@ -18,6 +18,36 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.35.6] — 2026-07-17
+
+### Fixed
+
+- **The reach ring around the avatar rendered as a radiation symbol when zoomed in.** Four fat
+  gold wedges with gaps on the diagonals, instead of a ring. Reported as demo-only; it was not —
+  it reproduces everywhere, and only looked demo-specific because it takes zoom to become
+  visible.
+
+  `.map-reach` is laid out at its true world size: `INTERACT_RADIUS (15) × 2 × L`, and
+  `L = LAYER_PX / WORLD_SPAN = 4000 / 100000 = 0.04`, so the box is **1.2 layout px** — narrower
+  than its own 2px border. Chromium fits a dash pattern to that degenerate circle (about four
+  dashes go round it) and the camera transform then magnifies them. The border is now `solid`:
+  a solid border has no pattern to degenerate, so it reads the same at every zoom, and the ring
+  keeps the exact look it has always had.
+
+  Isolating it took two wrong theories first — CSS minification (the built rule is byte-identical
+  to source) and dash-scaling-with-zoom (a transform scales dashes *with* the element, so the
+  ratio is fixed). What settled it was rendering the rule on its own across a spread of layout
+  sizes and scales: at layout 15px / scale 8 the wedges appear exactly as reported.
+
+### Known issue (pre-existing, not addressed here)
+
+- **The reach ring is several times larger than the reach it depicts.** It is ~96% border: the
+  true circle is `1.2 × zoom ≈ 11px` on screen at play zoom, while its 2px border renders
+  `2 × zoom ≈ 18px` *per side*. What reads as the gold disc IS the magnified border, so it
+  overstates the interaction radius by roughly 4.7×. Fixing that is a design decision about what
+  the indicator should be, not a rendering fix, so it is deliberately left alone — see the note
+  on `.map-reach`.
+
 ## [0.35.5] — 2026-07-17
 
 ### Fixed
