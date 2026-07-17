@@ -18,6 +18,75 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.45.0] — Research finishes in the field, and is unlocked at the HUB
+
+![A research finished and waiting to be unlocked](docs/images/changelog/0.45.0-ready-to-unlock.png)
+
+**The timer running out is no longer the unlock.** A research now fills to *ready* and stops
+there: the work happened out in the world, and you come back to the HUB to take it off the
+bench. That's the rule every other HUB action already follows — milestones are submitted in
+person, hand-crafting happens at the bench, the burner bank is loaded by hand — and research
+was the one thing that quietly applied itself while you were three valleys away.
+
+So `simulateResearch()` no longer unlocks anything; it only ever runs a clock. `researched`
+now grows in exactly one place — `claimResearch`, at the HUB — which also means a ready
+research can sit on the bench for a week and still be waiting when you get back, rather than
+having silently applied itself at some point you'll never know.
+
+**The notification changed job with it.** It used to say a research was *done*; it now says
+it's **ready**, and its point is to send you home: "Leg Exoskeleton is ready — unlock it at
+the HUB". The Tech tab also badges while something's waiting, the same cue the HUB tab uses
+for an affordable milestone — a toast you missed shouldn't be the only signal.
+
+**Still exactly one at a time**, and now a finished-but-uncollected research keeps holding
+the slot: the facility is busy until you come and clear the bench. The card says which of
+the two is blocking you.
+
+**Research time comes from depth, not from a flat number.** The first node of a branch is now
+**12 s** — it was 120, which made the very first thing the tree ever asks of you a two-minute
+wait to prove the tree was worth using. Each tier deeper multiplies by 1.9: **12 s → 23 s →
+43 s → 82 s → 156 s**. Authoring a node sets no time at all — where you hang it in the web IS
+how long it takes, and rebalancing the whole tree is one constant
+(`RESEARCH_BASE_SECONDS` / `RESEARCH_DEPTH_MULT`) rather than an edit per node. Depth is the
+*longest* prerequisite chain: a node you can only reach through four others is four tiers in,
+whichever way you count to it.
+
+Save is **v31**: a `progress` of exactly 1 is the ready state, and the v30 parser clamped it
+below 1 — which would have quietly restarted a finished research on every load.
+
+## [0.44.3] — A reset button for the tech tree (temporary, testing only)
+
+![The dev tool at the foot of the tech panel](docs/images/changelog/0.44.3-tech-dev-reset.png)
+
+Replaying the tech tree's states meant starting a fresh save. There's now a **Reset tech
+tree** button at the foot of the Tech panel: everything researched is forgotten, any running
+research is dropped, and the tree is untouched again.
+
+**It is scaffolding and it says so** — tagged `DEV TOOL`, dashed and muted, so it never
+reads as a designed "respec". It refunds nothing (pair it with the infinite-resources cheat
+to re-run a node) and it confirms first, since it throws away real progress on a real save.
+
+It's **built to be deleted**: three greppable pieces marked `DEV-TECH-RESET` — the store's
+`resetResearch`, `TechDevTools` in `TechView.tsx`, and the `tech.dev.*` copy. Nothing else
+references them.
+
+Resetting needs no unwinding, which is the payoff of effects being folded on read: every
+gate and `moveSpeed` derive from `researched`, so clearing the list *is* the undo.
+
+## [0.44.2] — Panels close with an X
+
+![The close X on an open panel](docs/images/changelog/0.44.2-panel-close.png)
+
+Closing an open panel was only ever its own toggle: press the bar button again, or its key.
+Both work, and neither is *visible* — you have to already know. Every panel now carries an X
+in its top-right corner, the same affordance the briefing, options, and slot-picker modals
+already have.
+
+It lives outside the panel's scrolling body, so it stays in the corner rather than sliding
+away with the content, and it's rendered once in `App` around whichever panel is open —
+Sources, Buildings, HUB, and Tech get it by construction, and so does the next one. The
+toggle and the keyboard shortcut are untouched.
+
 ## [0.44.1] — The tech tree gets a board, and research says when it's done
 
 Three things 0.44.0 got wrong, all found by playing it.
