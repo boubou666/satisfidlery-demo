@@ -18,6 +18,21 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.47.1] — Intro polish: a sideways rift, a boxier ship, a laser that lands
+
+![The starship flies along a sideways wormhole](docs/images/changelog/0.47.1-intro-polish.png)
+
+Three fixes to the new-game cinematic from 0.47.0:
+
+- **The wormhole now runs sideways.** It used to be a bullseye of circles rushing straight at
+  the camera; now it's a horizontal tunnel whose throat is off to the right, with tall
+  ellipse rings that sweep leftward past the ship and light streaking horizontally — so the
+  ship reads as flying *along* the rift rather than into it.
+- **The ship is a boxier freighter.** The old rounded, plane-like hull is now a rectangular
+  body with a flat-panelled deck, a rectangular cockpit window, and blocky fins.
+- **The laser actually connects.** The beam is now anchored on the hull hit-point and sweeps in
+  from off-screen to touch it, instead of passing below the ship and missing.
+
 ## [0.47.0] — A cold-open cinematic: how you got here
 
 ![The ship falls out of the rift into an unknown system](docs/images/changelog/0.47.0-intro-cinematic.png)
