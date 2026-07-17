@@ -18,6 +18,55 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.51.0] — Save, or drop it — your call on the way out
+
+![The pause menu's "Save this game before leaving?" popover, offering Save & main menu, Leave without saving, and Cancel](docs/images/changelog/0.51.0-save-or-drop.png)
+
+Every path that leaves the running game used to save first, silently — the only choice was
+*when* to go, never *whether* to keep what you'd done since the last save. Now each of the three
+exits — **Load game**, **Main menu**, and **Quit** (Electron only) — first asks: *save this game
+before leaving?* The accent choice saves and then goes; the loss-tinted **Leave without saving**
+drops everything since the last save; **Cancel** stays put. That's the whole ask — the decision
+belongs to the player, not to an always-save.
+
+Under the hood, \`saveFirst\` threads through \`exitToMenu\`/\`switchSlot\`, and a no-save quit disarms
+App's \`beforeunload\`/unmount save so the changes you asked to drop can't sneak back in. The
+\`ConfirmButton\` popover grew an optional middle action (stacked vertically when present), scoped so
+the pause menu's \`.modal button\` styling can no longer repaint it orange.
+
+The main-menu tagline is new too: **"Farthest from the sun. Build a way home."** — the name
+*Aphelion* is literally the far point of an orbit, and the game is the climb back. It breaks
+cleanly at the sentence rather than orphaning a word.
+
+![The main menu with the new tagline under the APHELION wordmark](docs/images/changelog/0.51.0-tagline.png)
+
+## [0.50.2] — Disassemble reaches further
+
+![The much wider disassemble ring spanning most of the viewport](docs/images/changelog/0.50.2-disassemble-wider-reach.png)
+
+Disassemble mode was capped at the same reach as placement (\`BUILD_RADIUS\`, 240 u) — fine for
+dropping a machine, tight for cleaning up. Teardown now has its own, wider reach:
+\`DISASSEMBLE_RADIUS\` at **600 u** (2.5×). Tearing a factory back down is a survey job, so you can
+reclaim a distant corner without walking to it — the ring, its red node/belt/wire cues, and the
+store's range checks all read from the new constant, so what glows inside the (now much larger)
+ring is exactly what a tap will take. Placement's reach is unchanged.
+
+## [0.50.1] — Disassemble mode reaches belts and wires (and stops walking)
+
+![Disassemble mode with a powerline highlighted red as a removal target](docs/images/changelog/0.50.1-disassemble-belts-wires.png)
+
+Disassemble mode shipped in 0.50.0 handling the map's *nodes* — buildings, miners, poles, the
+HUB — but left the two things strung *between* them, belts and powerlines, to the popover. Now
+the mode removes those too: the flow-layer hit-test (the same one belt/power modes use to pick a
+wire or band for removal) is active in disassemble mode for **both** at once, so hovering a belt
+or wire inside the ring lights it up in the removal-red and a tap tears it down and refunds it.
+Like the nodes, they're only reclaimable when the tap lands inside the build ring — the red hover
+cue is suppressed outside it, so what glows is exactly what a tap will take.
+
+Also fixes a bug from 0.50.0: tapping empty ground while in disassemble mode fell through the
+tool ladder to "walk here", so a missed tap marched the avatar across the map. Empty-ground taps
+in disassemble mode are now inert — the tool only ever removes the thing you tap.
+
 ## [0.50.0] — Disassemble mode: tear down at a distance
 
 ![Disassemble mode active — the build-radius ring with removable buildings outlined in red](docs/images/changelog/0.50.0-disassemble-mode.png)
