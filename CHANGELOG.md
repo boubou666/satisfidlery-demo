@@ -18,6 +18,33 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.47.0] — A cold-open cinematic: how you got here
+
+![The ship falls out of the rift into an unknown system](docs/images/changelog/0.47.0-intro-cinematic.png)
+
+**The new-game intro is now a six-beat space cinematic.** It used to be a single shot — a drop
+pod already burning through the atmosphere — which dropped you at the crash with no idea how you
+got there. Now it tells the whole arrival:
+
+1. **Through the rift** — a starship drifts through a wormhole, light streaking past.
+2. **Alarm** — the cockpit dashboard throws a proximity warning and the screen pulses red.
+3. **Hull breach** — a laser beam lances in and strikes the ship; sparks tear off the hull.
+4. **Emergency exit** — the ship falls out of the rift into an unknown solar system, and a star
+   chart pulls back to show the neighbouring systems with a **YOU ARE HERE** marker (pictured).
+5. **Ejecting** — the crippled ship comes apart, its hull sections flung outward, and a **drop
+   pod launches free** toward a planet.
+6. **Crash landing** — the pod plunges through the atmosphere and slams into the surface, and the
+   game begins.
+
+Each beat carries a short caption, and the whole thing is **skippable** at any point — click or
+press any key. It plays **only for a new game** (never on load), so it stays a once-per-save
+cold open. Built the way the rest of the game's cutscenes are — pure CSS/SVG, no new assets or
+dependencies — with a shortened calm still for players who ask for reduced motion.
+
+Under the hood this replaces `DropPodCrash.tsx` with `IntroCinematic.tsx`, a phase-sequenced
+component whose `phase-*` class drives every layer; the old single-scene crash lives on as its
+final beat, rebuilt to match the new art.
+
 ## [0.46.0] — The game is now called Aphelion
 
 **Satisfidlery is renamed to Aphelion.** The name it launched under was a portmanteau built
