@@ -18,6 +18,14 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.47.6] — Angle the ejected pod along its trajectory
+
+The real problem with the ejected pod wasn't where it was going — it was that it flew there
+drawn bolt upright, its body crosswise to its own path. It's now **rotated to point along the
+ship→planet vector** (heat-shield leading, ~50° off vertical), so the capsule is aligned with
+the direction it's travelling. Its destination is back to the lower-right system it was aimed at
+before (0.47.5 had moved it dead-centre, which wasn't the issue).
+
 ## [0.47.5] — The ejected pod heads for the planet
 
 On the ship-breaks-apart beat, the escaping drop pod used to shoot off toward a system in the
