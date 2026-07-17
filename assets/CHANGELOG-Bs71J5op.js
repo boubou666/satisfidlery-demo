@@ -18,6 +18,47 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.41.9] — 2026-07-17
+
+### Fixed
+
+- **The flow layer redraws at 30fps, not 60.** Two viewport-sized, dpr-scaled canvases, and
+  a canvas that changes is re-uploaded whole — so the layer's cost is its *area*, not its
+  contents. Measured in a real renderer on the stress world: the JS inside \`drawFlowLayer\`
+  is ~1ms, yet drawing it every frame took a still camera from 60fps to 20fps. Halving the
+  rate gives back a third of that for nothing anyone can see — a belt moves 60 items a
+  minute and its texture scrolls at the same crawl. This is cargo, not a crosshair.
+
+- **The ambient overlay was painted twice per frame while dragging.** A camera move repaints
+  the overlay in the terrain's own frame (so the layers can't desync), and the 20fps loop
+  repainted it again in that same frame — 398 paints across 200 frames, ~5ms of pure
+  duplication each. The camera path now skips when the loop has already painted on this
+  exact rAF timestamp.
+
+### Known — the real numbers, at last
+
+Electron with a real GPU and real rAF (headless can do neither: \`--virtual-time-budget\`
+fakes the clock so every in-page timing reads 0ms, and without it rAF never runs). On the
+**stress world** — 150 factories, which is the point of it:
+
+| | still | dragging |
+|---|---|---|
+| baseline | 50ms (20fps) | 67ms (15fps) |
+| flow layer not drawn | **17ms (60fps)** | 50ms |
+| markers not rendered | 33ms (30fps) | 50ms |
+| ambient not painted | 50ms | 67ms |
+
+Instrumented, the JS is *not* the problem: flow ~1ms, ambient ~4.5ms, terrain+field
+0.06ms, React ~2ms — **~14ms of a 67ms frame**. The rest is paint and composite. And the
+flow layer costs ~16ms/frame even when redrawn at **5fps**, which means it isn't the
+drawing at all: it's compositing two full-screen layers that have content in them.
+
+That last part is likely a WSLg artifact (software compositing) and may not transfer to a
+native Windows GPU — but it's consistent with the profile from Task Manager: **CPU ~18%
+with the GPU at 5%**, i.e. one core pinned while the card idles. If it holds on native, the
+lever is the canvases themselves: fewer full-screen layers, or a smaller backing store than
+\`dpr\` for art that's mostly flat colour.
+
 ## [0.41.8] — 2026-07-17
 
 ### Changed
