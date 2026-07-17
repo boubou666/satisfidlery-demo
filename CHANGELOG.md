@@ -18,6 +18,25 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.50.0] — Disassemble mode: tear down at a distance
+
+![Disassemble mode active — the build-radius ring with removable buildings outlined in red](docs/images/changelog/0.50.0-disassemble-mode.png)
+
+Tearing a machine down used to mean walking right up to it and using its popover. Now there's
+a **Disassemble** tool in the map toolbar (shortcut **5**) that works the same way placement
+does: turn it on and a **build-radius ring** appears around you, everything inside it that can
+be reclaimed — buildings, Miner Mk1s, power poles, even the HUB — is outlined in red, and a
+single tap removes it and refunds its materials. No walk required; if you can *build* somewhere
+in that ring, you can now *unbuild* there too.
+
+The reach is the symmetric twin of placement: the store's dismantle actions grew an `atRange`
+flag that swaps the arm's-length check for the same `BUILD_RADIUS` gate placement uses (a new
+`playerCanReachToBuild` helper), so disassemble mode reclaims from a distance while the popover's
+close-up dismantle is unchanged. The refund rules are exactly as before — full cost plus buffered
+contents back, all-or-nothing when the grid is full — so this is purely a new *reach*, not a new
+teardown path. Esc, right-click, or the Done button leaves the mode; it's mutually exclusive with
+the other map tools, one at a time.
+
 ## [0.49.0] — Keep placing the same building
 
 ![The placement toolbar's new Place: continuous toggle, mid-run](docs/images/changelog/0.49.0-continuous-placement.png)
