@@ -18,6 +18,56 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.39.2] — 2026-07-17
+
+### Fixed
+
+- **The map tool shortcuts did nothing on an AZERTY keyboard.** They matched
+  `KeyboardEvent.key` — the *character* — and AZERTY's digit row is shifted, so pressing
+  the `1` key reports `&` and a binding of `'1'` never fired. (It would have broken every
+  non-Latin layout too, where `key` is a letter no binding mentions.)
+
+  **Bindings are physical keys now (`KeyboardEvent.code`), not characters** — `Digit1`,
+  `KeyS`: the *place* on the keyboard, independent of what that place types. One build
+  works on QWERTY, AZERTY and QWERTZ with **no layout setting to get wrong**, which is
+  why there's no toggle in Options: binding the position is the fix a layout option would
+  only ever approximate. (It's also why AZERTY players get ZQSD from a WASD binding for
+  free, if movement keys ever land.)
+
+  The labels are the other half: `keyLabel` asks the Keyboard Map API what a physical key
+  actually types on the player's layout, so rebinding to the key labelled `A` on AZERTY
+  shows "A" and not the "Q" that sits in that spot on QWERTY. Chromium-only — the Electron
+  build and the demo — and elsewhere it falls back to the code's own letter, which is only
+  ever cosmetically wrong. A key printed with the wrong letter is a nuisance; a key that
+  doesn't fire is a bug, so binding is exact and labelling is best-effort, never the
+  reverse. Digits stay printed as digits: AZERTY's `1` types `&`, but the keycap says 1
+  and "&" for a toolbar's first slot reads like a typo.
+
+  Shift no longer blocks a shortcut, since AZERTY needs it to type those digits at all.
+  Ctrl/Alt/Meta still bow out — those combos belong to the OS and the browser.
+
+  Overrides saved by 0.39.0–0.39.1 (stored as characters) are upgraded to codes on read,
+  so a rebind you'd already made keeps working.
+
+## [0.39.1] — 2026-07-17
+
+### Added
+
+- **The map tools have shortcuts too**: `1` Scan, `2` Build, `3` Powerline, `4` Belt,
+  each printed on its own button.
+
+  ![The map tools, each carrying its key](docs/images/changelog/v0.39.1-map-tool-keys.png)
+
+  **Numbers, not initials** — the obvious letters are already spoken for (`S` is Sources,
+  `B` is Buildings), and the tools are a positional toolbar, so they're numbered
+  top-to-bottom the way they're stacked. Rebind them to taste once Options can: the badge
+  renders whatever the action is bound to.
+
+  Each key fires the same toggle its button does — Scan and Build got named callbacks
+  instead of inline `onClick` lambdas so there's one path, not two that can drift — and
+  is bound only while its button is on screen, so an unbuilt tool has no key. Pressing
+  one closes the other tools, exactly as clicking does: the map runs one tool at a time.
+
 ## [0.39.0] — 2026-07-17
 
 ### Added
