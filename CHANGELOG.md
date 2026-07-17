@@ -18,6 +18,66 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.37.0] — 2026-07-17
+
+### Added
+
+- **A main menu.** The game had no front door. Importing the store read `localStorage` at
+  module scope, so you were simply *in* whatever save existed — there was one save, you
+  could never have a second, and the only way to start over was a Hard reset that wiped
+  the first. The menu makes that a decision instead of a side effect: **Continue** (the
+  slot you were last in), **New game**, **Load game**, **Load save file**, **Options**, and
+  **Quit**. `activeSlot === null` is the whole condition for being here.
+
+  ![The main menu](docs/images/changelog/v0.37.0-main-menu.png)
+
+  **The background is not a background.** It's the actual game renderer: the same
+  `terrainGpu` shader that paints the map, over a world from the same seeded terrain, with
+  rivers flowing down the same D8 network and cloud shadows drifting on the same shared
+  `wind.ts` vector. A fresh seed every launch means the title screen is a different planet
+  every time, and every one of them is somewhere you could land. The camera traces a slow
+  Lissajous path — two pans at coprime periods, so it never retraces and never needs a
+  keyframe — and breathes through a zoom band chosen on purpose: `ambientfx` fades surface
+  detail *out* from worldPerPx 4→26 and cloud shadows *in* from 9→34, so the flyover sits in
+  the one place both are on screen at once, glinting water under moving weather.
+
+  It's affordable for the same reason dragging the map is: the GPU pass is ~0.3ms per
+  viewport, so a camera that never stops costs about what a drag already costs (capped at
+  30fps — the flyover is slow enough that it reads as smooth). Terrain and ambience repaint
+  in the *same* frame, as MapView does it; the field carries its own camera, so painting
+  them on separate clocks slides the foam off the coastline. Reduced motion keeps the
+  world and stops the flight: one still frame of a real place, which was the shot anyway.
+
+- **Three save slots, and saves as files.** Picking a slot for a new game warns before
+  overwriting one that's occupied — the single most destructive click on the screen. Each
+  slot summarizes itself (stage, sources, buildings, and how long ago it was saved) without
+  deserializing: reading a full state allocates a Decimal per resource and rebuilds every
+  belt, far too much to do three times just to draw a list, so the summary comes off the
+  raw JSON. Slots can be **exported** to a `.json` file and loaded back — export is what
+  makes "Load save file" worth having, since without a way to get a save *out* there is
+  never a file to put back in.
+
+  ![The save slot board](docs/images/changelog/v0.37.0-save-slots.png)
+
+  An existing game is **migrated into slot 1** on first launch, so a player mid-factory finds
+  it waiting rather than an empty board. The save *shape* didn't change — this is purely
+  which key it lives under (`save.ts` still owns the shape, `saveSlots.ts` now owns the
+  storage), so **the save version stays v28** and no one's game is touched.
+
+  Importing a file gates on the `v` stamp. `deserialize` is deliberately forward-tolerant —
+  anything it can't read falls back to the new-game value — which is right for a save from an
+  older build and exactly wrong for a file picked by mistake: without the check, *any* JSON
+  would "load" as a pristine world and read as a wiped save.
+
+### Changed
+
+- **The pause menu can leave the game**, not just the app: **Main menu** saves and backs out
+  to the title screen. Quit is Electron-only (a browser can't close a tab it didn't open),
+  which left the browser build with no way out of a save at all — now it has one.
+- **The changelog is in the game, for everyone.** It was demo-only when the DevBanner was its
+  only door; the menu's version button now opens the full history in every build. It stays a
+  lazy `?raw` import in its own chunk, so no build pays for it until someone opens it.
+
 ## [0.36.0] — 2026-07-17
 
 ### Added
