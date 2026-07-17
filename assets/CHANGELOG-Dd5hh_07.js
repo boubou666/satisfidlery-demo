@@ -18,6 +18,20 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.47.3] — Intro tweaks: face the rift, arrive burning
+
+![The hauler arrives in the new system already on fire](docs/images/changelog/0.47.0-intro-cinematic.png)
+
+Three small fixes to the intro cinematic:
+
+- **The rift faces you in the cockpit.** From the pilot's seat you now look straight down the
+  wormhole — concentric rings dead ahead through the windshield — instead of at the sideways
+  tunnel (which is still what you see from outside in the earlier beat).
+- **The ship arrives already burning.** When it falls out of the rift into the new system it's
+  visibly on fire — a hull flame, sparks, and a smoke plume trailing off — carried through to
+  the moment it breaks apart, rather than looking pristine right up until it dislocates.
+- **Removed the "YOU ARE HERE" tag** from the star chart.
+
 ## [0.47.2] — Into the cockpit, and a proper hauler
 
 ![Inside the cockpit as the proximity alarm fires](docs/images/changelog/0.47.2-cockpit-hauler.png)
