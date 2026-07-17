@@ -18,6 +18,37 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.44.1] — The tech tree gets a board, and research says when it's done
+
+Three things 0.44.0 got wrong, all found by playing it.
+
+![The tech board: a centred root, a card that fits](docs/images/changelog/0.44.1-tech-board.png)
+
+**The card was clipped.** The web laid its cards on fixed 150 px grid rows, so the very
+first node — cost list, button, hint — overflowed into its own scrollbar with the Research
+button cut in half. A fixed cell clips *whatever doesn't fit*, and a card's height is its
+content's: a longer cost list, a progress bar, a locked note. Rows now size to content, and
+**the edges are drawn from measured card centers** rather than from grid maths, so the lines
+follow what actually landed instead of where a card was supposed to be. Verified with four
+nodes, one deliberately taller than its row neighbour: every endpoint lands on a card
+center, nothing clips.
+
+**The tree needed room.** It's the one panel you survey rather than skim, so it's the
+widest one and the only one that doesn't hug its content — the space below the first node
+is the tree ahead of you. The root sits centred and the tree grows down from it, which is
+the shape the thing is meant to have.
+
+**Research finished in silence.** It completes while you're mining, walking, or away
+entirely — that's the whole point of it — so nothing on screen would ever tell you. It now
+announces itself with a toast carrying the tech glyph, watching \`researched\` rather than the
+action, so a research that lands inside the offline catch-up gets the same notice. Two
+toasts at once stack instead of overlapping.
+
+**And the unlock fanfare had no words**: \`tut.research.kicker\`/\`main\` were never written, so
+the Research Facility's celebration showed raw keys. Written — and then every milestone's
+copy was swept the same way (88 strings across 8 tutorials, 7 milestones, and the tech tree)
+to be sure this was the only one. It was.
+
 ## [0.44.0] — The last milestone: biomass, and the tech tree
 
 The milestone chain has always dead-ended at Conveyor Logistics. **Research Facility** is
