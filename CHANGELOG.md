@@ -18,6 +18,21 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.47.2] — Into the cockpit, and a proper hauler
+
+![Inside the cockpit as the proximity alarm fires](docs/images/changelog/0.47.2-cockpit-hauler.png)
+
+Two more passes on the intro cinematic:
+
+- **The alarm beat is now a first-person cockpit shot.** Instead of a HUD strip over the
+  exterior ship, the view moves *inside* the ship: you look out at the rift through the
+  windshield while the console fills the frame — gauges, indicator banks, and a blinking
+  **WARNING** MFD — with the red alert pulsing over everything.
+- **The ship is a proper military hauler.** The boxy freighter is redrawn as a bulky grey
+  warship after a reference: a rear cluster of engine nacelles with glowing exhausts, an
+  armoured hull with a raised deck, panel lines and a stencilled hull number, a dorsal fin,
+  a ventral pod, and a low cockpit greenhouse at the nose.
+
 ## [0.47.1] — Intro polish: a sideways rift, a boxier ship, a laser that lands
 
 ![The starship flies along a sideways wormhole](docs/images/changelog/0.47.1-intro-polish.png)
