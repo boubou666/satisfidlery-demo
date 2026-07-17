@@ -18,6 +18,14 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.47.4] — The drop pod lands on the planet
+
+The pod used to enter the crash shot from the side and touch down about 50px below the planet's
+peak, so it read as slightly off the planet. It now falls **straight down the centre onto the
+planet's apex** — no horizontal drift — so the pod, the impact and the planet's peak all line up
+(measured: all three centred to the pixel). The ejected pod in the previous beat also now aims at
+the lower-right system on the star chart instead of empty space.
+
 ## [0.47.3] — Intro tweaks: face the rift, arrive burning
 
 ![The hauler arrives in the new system already on fire](docs/images/changelog/0.47.0-intro-cinematic.png)
