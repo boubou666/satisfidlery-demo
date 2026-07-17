@@ -18,6 +18,88 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.40.2] — 2026-07-17
+
+### Fixed
+
+- **The map rendered every marker in the world, on screen or not.** Every source,
+  building, pole and reveal got a DOM node — ~900 of them on the stress world — and since
+  the store hands MapView new `sources`/`buildings` arrays each tick, React reconciled the
+  lot ten times a second, for markers nobody could see. Markers are now culled to the
+  camera (plus a 140px margin so nothing pops in while panning). The cull is on position
+  only: `nodes` itself stays whole, so clustering, selection and the node popover still
+  see every node, and panning away from an open popover doesn't yank it shut.
+
+- **Id lookups were `Array.find`, in per-frame loops.** `endpointPos` for both ends of
+  every powerline, `beltEndpointPos`/`beltPorts`/`endpointOrientation` for every belt —
+  each scanning all 600 buildings. That's fine with a dozen machines and quadratic with
+  six hundred: ~1.4M id comparisons per frame on the flow canvas's rAF loop. There's now
+  one id→entity index (`lookup.ts`), built once per state object and shared by every
+  caller looking at it — engine, map and panels alike. Keyed on the state (not the
+  arrays), because a tick hands back a new `buildings` array holding the same ids.
+
+  | per frame, stress world | before | after |
+  |---|---|---|
+  | `endpointPos` × 2 per wire | 0.68ms | 0.06ms |
+  | `beltEndpointPos` × 2 per belt | 2.06ms | 0.04ms |
+  | `endpointOrientation` per belt | 1.03ms | 0.02ms |
+  | **total lookups** | **~3.8ms** | **~0.1ms** |
+
+  End to end: the stress world at a zoomed-out camera couldn't finish a single frame in
+  70 seconds on the headless CPU renderer before; it now draws in 6.4s and the in-game
+  counter reads 42fps *without* a GPU. Verified the indexed lookups against linear scans
+  on every wire and belt end, that moving a building re-indexes, and that a dismantled one
+  resolves to null rather than a ghost.
+
+### Known
+
+- **A full survey zoom still renders all ~900 markers**, because that's when they're all
+  genuinely on screen and marker clustering is off by design (`CLUSTER_SCREEN_PX = 0`).
+  Culling can't help there; re-enabling clustering is the lever, and that's a look
+  decision, not a perf one.
+- **The flow canvas still draws every belt, wire and item** regardless of the camera —
+  cheap now that the lookups are O(1), but it's per-frame work for geometry that's often
+  off screen.
+
+## [0.40.1] — 2026-07-17
+
+### Fixed
+
+- **The engine was spending 21ms of every 100ms tick rebuilding a graph that hadn't
+  changed.** The stress world found it on its first outing, which is what it's for.
+
+  `powerComponents()` — the BFS that partitions the grid into its separate wirings — was
+  **9.4ms a call** on that world, and `powerNetwork()` calls it, and *everything* calls
+  `powerNetwork()`: `simulate()`, `simulateBurners()`, the map on every render, and each
+  open panel. Four-plus full rebuilds per tick, ten ticks a second, of a partition that
+  only changes when you wire something. Each one lands as a single block of main thread
+  well over a 60fps frame's entire 16.7ms budget, so it wasn't 20% slower — it was a
+  guaranteed dropped frame, ten times a second.
+
+  Two fixes, both in `powerComponents`:
+
+  - **It's cached on the `powerLines` array's identity.** Sound because the partition
+    reads that array and nothing else — it's pure topology — and the engine never
+    rebuilds the array, so the cache holds across ticks and not just within one. The
+    same trick `terrain.ts` already uses for its model.
+  - **Lines are bucketed into their component in one pass** instead of re-filtering every
+    line for every component. That was O(components × lines) — on a map with 150 separate
+    grids and 600 wires, most of the 9.4ms.
+
+  Measured on the stress world (150 chains, 600 buildings, 450 belts, 600 wires), via a
+  throwaway Node benchmark of the pure engine:
+
+  | | before | after |
+  |---|---|---|
+  | full tick | 21.18ms | **1.03ms** |
+  | `powerNetwork()` | 10.41ms | 0.37ms |
+  | `powerComponents()` | 9.44ms | ~0ms |
+
+  Verified against the old implementation rather than trusted: identical partitions on the
+  stress world, on a cut grid, and on an empty one; the cache re-computes when the wires
+  change and is skipped when they don't; and the factory still runs exactly as before
+  (450 items riding belts, 300 machines mid-cycle after the same warmup).
+
 ## [0.40.0] — 2026-07-17
 
 ### Added
