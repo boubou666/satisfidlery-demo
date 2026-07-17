@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to **Satisfidlery** are recorded here, newest first. Each
+All notable changes to **Aphelion** (formerly **Satisfidlery**) are recorded here, newest first. Each
 completed piece of work gets an entry — with a screenshot whenever the change is
 visible in-game.
 
@@ -17,6 +17,36 @@ before this file is in the git log.
 ## [Unreleased]
 
 _Nothing yet._
+
+## [0.46.0] — The game is now called Aphelion
+
+**Satisfidlery is renamed to Aphelion.** The name it launched under was a portmanteau built
+to advertise "a Satisfactory idle game" — and that was exactly the mindset we're now stepping
+away from. **Aphelion** is the farthest point of an orbit from its star: you crash-land at the
+edge, as far from home as it gets, and build your way back. The name commits to *this* game's
+world rather than to being a fan tribute, which is the whole point of the new design
+direction — the game is inspired by Satisfactory, not bound to mirror it.
+
+**Every player-facing surface now reads Aphelion**: the title bar and web title, the main-menu
+wordmark, the HUD brand, the Electron window title, the web manifest, and the save-file
+messages and exported filenames (`aphelion-slotN.json`).
+
+**Your saves and settings carry over automatically.** The game's `localStorage` keys moved
+from the `satisfidlery:` prefix to `aphelion:`; a one-time migration runs at startup, before
+anything reads storage, and copies every old key across (saves, keybinds, locale, cheat
+flags). It's idempotent and never overwrites, so nothing is lost and nothing has to be
+re-done.
+
+**What deliberately kept the old name**: the private source repo, the public demo repo
+(`boubou666/satisfidlery-demo`) and its live Pages URL, and the Electron `appId`. Renaming
+those would break the live demo link people already have and change the app's identity for
+installed builds — so they stay on the `satisfidlery` slug for now, decoupled from the
+in-game rename.
+
+**And a new standing directive** (in `CLAUDE.md`): Aphelion is inspired by Satisfactory, not a
+port of it. Raw materials, buildings, recipes and mechanics are free to diverge whenever a
+different choice makes a better idle game — "that's not how Satisfactory does it" is not an
+argument against a design.
 
 ## [0.45.0] — Research finishes in the field, and is unlocked at the HUB
 
