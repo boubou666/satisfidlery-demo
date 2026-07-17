@@ -18,6 +18,41 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.41.8] — 2026-07-17
+
+### Changed
+
+- **The ambient field is world-anchored and survives a pan.** It was rebuilt from scratch on
+  every camera move — a second GPU pass, a synchronous \`readPixels\`, a copy and the
+  shoreline dilation — despite being a pure function of the world. Panning doesn't change
+  the ground; it changes which part of it you're looking at.
+
+  It's now built with \`FIELD_PAD_PX\` (320px) of slack on every side and kept until the
+  camera outruns it, at which point one rebuild refills the patch. \`renderField\` on the GPU
+  painter is the field pass **without** the colour draw, so the patch can be bigger than the
+  viewport while the terrain still paints exactly the viewport. And because the field knows
+  where it lives in the world, the overlay paints at an offset rather than at 0,0 — which is
+  also why it can't desync: a world-anchored field is never stale against the world, no
+  matter how fast the camera moves.
+
+  **400-frame drag at play zoom, on a real GPU: 5.2s → 4.5s.**
+
+  Verified where it counts: the same drag, before and after, lands the lake, its shore and
+  its foam in exactly the same place. Getting the offset wrong slides foam off the coastline
+  — the precise failure the same-frame repaint was built to prevent — so that comparison was
+  the point of the exercise, not the timing.
+
+### Known
+
+- **Every headless number reported before this entry ran on the CPU painter.** \`--disable-gpu\`
+  was inherited from a note about \`--headless=new\` crashing the GPU process — but plain
+  \`--headless\` *without* that flag has WebGL2 through ANGLE on the real card, and always did.
+  So the earlier figures (a survey zoom "at 60fps", a 400-frame drag at 27–37s) were a
+  software renderer's, ~6× slower than the real path, and every ratio drawn from them
+  understated how much of a frame the JS costs relative to the paint. The deltas still hold —
+  JS is JS — but the absolute numbers were the wrong machine. Measurements from here on use
+  the GPU.
+
 ## [0.41.7] — 2026-07-17
 
 ### Fixed
