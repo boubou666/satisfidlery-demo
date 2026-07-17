@@ -18,6 +18,40 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.41.5] — 2026-07-17
+
+### Fixed
+
+- **Every camera move stalled the GPU to build data nothing was reading.** The terrain
+  painter's `renderWithField` does a second, cell-resolution pass and then a **synchronous
+  `gl.readPixels`** — 563KB at 1440×900 — to hand back which cells are wet, which way each
+  river runs, and how far each is from shore. A readback like that stalls the pipeline: the
+  CPU waits for the GPU to catch up. MapView called it on *every camera move*, which during
+  a pan means every frame.
+
+  But that field is the **water pass's input and nothing else's** — the clouds sample world
+  positions, not cells — and the water fades out as the camera climbs. So above the fade,
+  the whole apparatus was producing data no one looked at: the extra GPU pass, the stall,
+  four typed arrays, and the shoreline dilation (**0.84ms** of CPU per camera move,
+  measured in Node) — all discarded.
+
+  MapView now asks the water pass's own gate (`needsSurfaceField`) and, above it, calls the
+  plain `render()` and hands the clouds a `shellAmbientField` — the shape and the camera,
+  no per-cell arrays. Producer and consumer ask the **same function**, so they can't drift
+  apart; if they did, the sea would go flat rather than merely slow. The shell's arrays are
+  empty rather than zero-filled, so anything reading them without checking fails loudly
+  instead of quietly drawing a world with no water in it.
+
+  Verified: the terrain still paints through the `render()` path at altitude, zooming back
+  in restores the field, and the gate lines up exactly — the field is skipped only from
+  25 world-units/px, where the water pass already returns (detail ≤ 0.006 against its own
+  0.01 floor).
+
+  **Not measurable here**: the headless renderer has no GPU, so it takes the CPU fallback
+  and never runs this path at all. The 0.84ms is the CPU half only; the stall and the second
+  pass are on top, and they land exactly where the complaint was — panning, at altitude,
+  where nothing else is culled.
+
 ## [0.41.4] — 2026-07-17
 
 ### Fixed
