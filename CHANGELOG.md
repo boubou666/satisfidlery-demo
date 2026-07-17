@@ -18,6 +18,46 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.42.0] — 2026-07-17
+
+### Added
+
+- **The power grid stops being drawn from altitude** (`POWERLINE_SHOW_SPAN`, 2500 — the same
+  line at which your avatar collapses to a dot). The belt band is a factory's *shape* and
+  survives being read from height; the wiring is plumbing, and a few hundred hair-thin lines
+  over a whole island are a yellow haze across everything else. **The poles go with them** —
+  a pole is the grid and nothing else, so once its wires aren't drawn a pole disc is a dot
+  marking nothing.
+
+- **A factory draws as one marker** (`MARKER_CLUSTER_SPAN`, 3000). Everything a belt connects
+  is one group — miner → smelter → constructor → storage — because a belt is the game's own
+  definition of "one thing the player built". Past the span each group collapses to a single
+  bubble with a count, and clicking it fans the machines out (the map's cluster machinery,
+  inert since it was disabled, finally has a job). Grouping by *connectivity* rather than
+  screen distance is what makes it read right: two factories built side by side stay two
+  bubbles, and a chain strung across a valley stays one.
+
+  ![The stress world from altitude: factories, belts, no wire haze](docs/images/changelog/v0.42.0-survey-bands.png)
+
+  Measured on the stress world at a survey zoom, real GPU, real frames:
+
+  | | markers | still | dragging |
+  |---|---|---|---|
+  | before | 849 | 67ms (15fps) | 83ms (12fps) |
+  | after | **284** | **50ms (20fps)** | **67ms (15fps)** |
+
+  `beltComponents` is a union-find over the belts, cached on the belts array's identity —
+  belts change only when the player lays or pulls one, and the map asks every render.
+
+### Known
+
+- **Biomass burners don't join their factory's bubble**, because they're wired to it rather
+  than belted, and the rule is belts. They're ~half the markers left at a survey zoom (144
+  bubbles vs 146 loose dots on the stress world). Folding in power connectivity as well
+  would merge each burner into the factory it feeds — one line, and it would roughly halve
+  the remaining markers — but that's a change to what the map *means*, so it's a call worth
+  making deliberately rather than as a perf tweak.
+
 ## [0.41.9] — 2026-07-17
 
 ### Fixed
