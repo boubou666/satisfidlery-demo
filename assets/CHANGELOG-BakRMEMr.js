@@ -18,6 +18,15 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.47.5] — The ejected pod heads for the planet
+
+On the ship-breaks-apart beat, the escaping drop pod used to shoot off toward a system in the
+lower-right corner — past the prominent planet sitting directly below the ship — so it looked
+like it wasn't aimed at anything. It now launches along the **vector from the ship straight down
+to the current system's planet** (the one centred in the next shot, and the world it crashes on),
+so it visibly heads for the planet. Measured: the pod tracks dead-centre from the ship to the
+planet.
+
 ## [0.47.4] — The drop pod lands on the planet
 
 The pod used to enter the crash shot from the side and touch down about 50px below the planet's
