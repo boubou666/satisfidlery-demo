@@ -18,6 +18,23 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.48.0] — Load at exactly where you left off
+
+**Offline progression is gone: a save loads at the exact state it was written.** Miners,
+belts, burners, research timers, and any in-progress build/walk/pod all freeze at the saved
+state and resume the instant you're back — nothing advances while the game is closed. This is
+a deliberate, manual-first choice: most production already needs you present, and it removes
+the biggest one-shot hitch on load (the old catch-up folded up to 8 hours through the whole
+sim on every load, and its belt half was a ~28,800-step loop over every belt).
+
+Live parallel automation is untouched — a line still runs itself *while you play* (while you
+mine, walk, or craft elsewhere); only the "kept running while you were away" part is removed.
+
+Under the hood: the \`applyOffline\` catch-up and the "Welcome back" modal (which never actually
+surfaced — it had nothing to report yet) are deleted, along with \`MAX_OFFLINE_SECONDS\`; tutorial
+and item copy that promised offline gains now says "while you play." The save shape is unchanged
+(\`lastTick\` is still written), so existing saves load untouched.
+
 ## [0.47.7] — A heavier laser
 
 ![The reinforced beam slams into the hull](docs/images/changelog/0.47.7-laser-power.png)
