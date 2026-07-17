@@ -18,6 +18,34 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.36.0] — 2026-07-17
+
+### Added
+
+- **Escape opens a pause menu.** Escape is the one key every player already knows means
+  "let me out", and until now it did nothing at the top level. It now opens a menu with
+  **Resume**, **Save game**, **Options**, and **Quit game** — which also gives the game a
+  discoverable home for the actions that were only reachable from the HUD strip.
+
+  ![The pause menu](docs/images/changelog/v0.36.0-pause-menu.png)
+
+  Escape is a **stack**, not a single hook: it backs out of the innermost thing first, and
+  only reaches the menu once there's nothing left to back out of. A map popover, a placement
+  ghost, a confirm prompt, or the Options dialog each swallow the key while they're up. The
+  wiring is `preventDefault` + `defaultPrevented`, with everything that claims the key
+  listening on `document` so it always resolves before the window-level menu handler —
+  ordering that can't be left to which effect happened to mount first.
+
+  **Quit** saves before it exits, so its prompt is about the surprise of ending the session,
+  not about losing progress. It appears **only in the Electron build**, feature-detected off
+  a new `nativeApp.quit` bridge (`electron/preload.cjs` → an `app:quit` handler in
+  `electron/main.cjs`) — the browser and demo builds have nothing to quit *to*, since
+  `window.close()` only works on a script-opened window, so they show the other three.
+
+  Note that the game keeps ticking while the menu is up: "Paused" names the screen, not a
+  halted simulation. An idle game that stops paying out because a menu is open would be
+  both a bug and, offline progress being what it is, unenforceable.
+
 ## [0.35.8] — 2026-07-17
 
 ### Fixed
