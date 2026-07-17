@@ -18,6 +18,144 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.38.0] — 2026-07-17
+
+### Added
+
+- **Every milestone now celebrates itself and then teaches you what it gave you.** The
+  "banger" that used to fire once, for the HUB, now fires for **every** milestone —
+  Field Fabrication, Assembly Line, Equipment Workshop, Power Grid, Mining Automation,
+  Conveyor Logistics — carrying that milestone's own glyph and name.
+
+  ![The celebration, now on every milestone](docs/images/changelog/v0.38.0-milestone-celebration.png)
+
+  Behind the confetti comes the part that was actually missing: an **unlock briefing**
+  that explains the new toys and how to use them. This is the "unlock tutorials" item off
+  the roadmap, and it earns its keep — a milestone that hands you three systems at once
+  (Power Grid: foraging, burners, powerlines) used to hand you three systems and a
+  paragraph of cost text.
+
+  ![The unlock briefing](docs/images/changelog/v0.38.0-unlock-briefing.png)
+
+  **Multiple unlocks are paged, not stacked.** One demo and one paragraph per step, with
+  dots to skip around — so the briefing scales from the HUB's two steps to Power Grid's
+  three without ever landing as a wall of text.
+
+- **The demos are animated, not illustrated.** Each step loops a little mock of the
+  interaction it teaches: the sensor sweeping up blips, a ghost snapping onto the grid,
+  leaves flying into a burner, a wire drawing itself to a machine that lights up, ore
+  riding a belt end to end. Ten scenes, hand-placed on a fixed 320×160 stage and animated
+  entirely in CSS — no game state, no rAF loop, and they keep running while the game ticks
+  underneath.
+
+  ![A belt demo, mid-loop](docs/images/changelog/v0.38.0-briefing-belt-demo.png)
+
+  They are deliberately **not** the real renderer. MapView needs a world and a camera that
+  don't exist behind a modal, and a real world would show whatever you happen to have built
+  instead of the thing being taught.
+
+### Changed
+
+- **A milestone is now content, not code.** A `TUTORIALS` table in `content.ts` names the
+  glyph, the steps, and which demo + items each step shows; the briefing and the celebration
+  read it generically. Adding a milestone's tutorial is one object plus its i18n copy —
+  there is no per-milestone component anywhere.
+- **Briefings fire once per save, and the queue is derived** — `built` minus the new
+  `seenTutorials` (save **v29**), rather than fired off a transition. So quitting mid-briefing
+  leaves it waiting on the next load, and several pending unlocks play in order instead of
+  racing. Existing saves are backfilled as already-seen: a mid-game player is not ambushed
+  with the whole backlog on load.
+- **Completed milestones keep a "How it works" link** in the HUB rail, so the demos stay a
+  reference you can come back to rather than a one-shot cutscene.
+
+## [0.37.3] — 2026-07-17
+
+### Added
+
+- **Load another save from the pause menu.** Escape now offers **Load game** between Save
+  and Options: it opens the same slot board the main menu uses, and picking a slot swaps
+  the running game for that one — no round trip out to the title screen and back in.
+
+  ![Load game in the pause menu](docs/images/changelog/v0.37.3-pause-load-game.png)
+
+  **Switching saves the game you're leaving first, and the order is the entire feature.**
+  `loadGame` moves `activeSlot` to the target, and every save path in the app reads that
+  field to decide where to write — so loading first would leave the outgoing game's
+  unmount-save pointed at the *incoming* slot. The session you walked away from would never
+  be written at all, and the last thing anyone would think to check is whether "load"
+  quietly discarded the world it loaded over. So the save-then-load lives in `store.switchSlot`,
+  not in a component where it's one refactor away from being reordered by someone who
+  didn't know.
+
+  The board is opened from inside a game here, so it **badges the slot you're playing** —
+  otherwise "load" means picking blind between rows that all look equally like somewhere
+  else. Picking that slot is a no-op rather than a pointless save-and-reload. No confirm:
+  the board *is* the deliberate step, and since the switch saves first there's nothing to
+  lose either way.
+
+  ![The slot board, opened from inside a game](docs/images/changelog/v0.37.3-pause-slot-board.png)
+
+  Escape still backs out one layer at a time — the board closes, the pause menu stays.
+
+## [0.37.2] — 2026-07-17
+
+### Changed
+
+- **The main menu is down to three entries**: Continue, New game, Load game (plus Quit in
+  the Electron build). **Load save file** and **Options** are pulled for now. Nothing is
+  lost by it — Options is still reachable in-game from the HUD strip and the pause menu,
+  which is where it's wanted anyway; the title screen was a second door to a dialog whose
+  cheats and language switch only mean anything once you're in a world.
+
+  Both are a button and an overlay branch away from returning. The machinery underneath is
+  untouched and still exercised: `parseSaveFile` (which gates on the `v` stamp) and
+  `store.loadStateInto` (which takes an imported state and asks the slot board where to put
+  it) are intact, and their translated copy stays in all three locales — the wording is the
+  expensive part of putting a button back, and an unused key costs nothing but its bytes.
+  The dead CSS went, since that isn't worth keeping around to look at.
+
+  A note for whoever restores it: the slot board's per-slot **Export** is now a one-way
+  door. It still writes a `.json`, which is a fine backup, but with no import in the menu
+  there's nowhere to feed it back in.
+
+## [0.37.1] — 2026-07-17
+
+### Added
+
+- **Pods fall on the main menu.** Every so often another drop pod comes down out there on
+  the flyover: a fireball burning in on a shallow entry, a flash, a shockwave ring, dirt
+  thrown out radially, then a crater smouldering downwind for a quarter of a minute. The
+  game opens with a pod crash — the title screen is the same planet a few moments earlier.
+
+  ![A pod burning in over the menu flyover](docs/images/changelog/v0.37.1-menu-pod-crash.png)
+
+  It's staged, but staged into a **real world**: the impact point is chosen off the
+  terrain's own ambient field, so a pod only ever lands on land, and the smoke drifts along
+  the same `windOf` vector as the clouds and every machine plume — the same weather as
+  everything around it. All of it is world-anchored; the camera never stops moving, and a
+  crash placed in screen space would slide over the ground like a smear on the lens.
+
+  **Altitude is the whole trick.** Top-down, a falling object and a distant one look
+  identical. So the pod's *ground* position slides along its entry line to the impact point
+  while the pod is drawn offset from it and its shadow is drawn on it — the two converge as
+  it falls, which is the one cue that reads unambiguously as height. The intro's
+  `DropPodCrash` couldn't help: it's a side-view DOM cinematic, and this is a map.
+
+  Sized against a real viewport, not a test canvas. At this altitude the whole event spans
+  a few dozen px on a 1440x900 screen, and the first pass — tuned in a thumbnail — vanished
+  entirely at the size anyone actually sees. Two other things only measurement caught: a
+  fade running the full 15s smoulder is down to a third by the 10s mark (technically still
+  there, invisible in practice), so the wreck now holds at full strength and fades over the
+  tail; and a scorch with a hot ember in it reads as a glowing eye staring out of the map
+  rather than as burnt ground.
+
+  A crash is on screen ~70–80% of a menu session, worst quiet gap ~11s. Over **open ocean
+  it never fires**, which is correct — there's nothing to hit. But a view that's sea through
+  the middle with coastline down one edge used to be silent too, with land plainly in frame:
+  the spawn only sampled the middle 60% and, worse, a failed pick burned the whole 12–28s
+  gap. It now falls back to the full frame and retries in 2s. That case measured 0%
+  visibility before the fix and ~75% after.
+
 ## [0.37.0] — 2026-07-17
 
 ### Added
