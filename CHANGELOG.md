@@ -18,6 +18,43 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.41.0] — 2026-07-17
+
+### Added
+
+- **Detail bands on the flow layer: zoom reads as altitude here too.** The belt band and
+  the wires are the factory's roads — they're its *shape*, and they draw at any zoom. What
+  rides on them doesn't: **riding items fade out past `BELT_ITEM_SHOW_SPAN`** (1600 world
+  units across the short edge) and **port nubs past `BELT_PORT_SHOW_SPAN`** (900).
+
+  ![The factory from altitude: bands and wires, no chip soup](docs/images/changelog/v0.41.0-survey-zoom.png)
+
+  This is a look decision first. Items and nubs are painted at a **fixed screen size** —
+  they're read, not measured — so pulling the camera back doesn't shrink them, it packs
+  more of them into the same pixels until a belt is a smear and every machine wears lint.
+  Exactly the argument `LABEL_HIDE_SPAN` already makes for labels, and the leaves, the
+  avatar and the smoke each have their own band.
+
+  It's also the entire cost. At a survey zoom nothing is off-screen, so culling saves
+  nothing and every item on every belt gets drawn. Nubs aren't clickable (`hitTestFlow`
+  only tests belts and wires), so hiding them costs no interaction. Up close, everything
+  is exactly as it was:
+
+  ![Play zoom: items riding, nubs, badges, smoke](docs/images/changelog/v0.41.0-play-zoom.png)
+
+### Fixed
+
+- **Belts are culled to the camera**, by the AABB of their anchors — padded by a quarter of
+  the belt's own span, since a curved route can bow outside its anchors and a false skip
+  would blink a belt out of existence while a false keep costs only what we paid before.
+  This skips the expensive half (baking and allocating the styled route), which ran for
+  every belt in the world on **every frame**, twice — once for the band, once for the
+  items. Wires already had a segment reject; markers were culled in 0.40.2.
+
+  On the stress world, a full survey zoom went from **never finishing a frame in 80
+  seconds** to **60fps** — on a headless renderer with no GPU at all. Play zoom reads 44fps
+  there, with every item, nub, badge and plume still drawn.
+
 ## [0.40.2] — 2026-07-17
 
 ### Fixed
