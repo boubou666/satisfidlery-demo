@@ -18,6 +18,40 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.43.1] — One belt per port, on both ends
+
+A storage in the stress world was visibly taking four belts at once. It has one input
+port, so that should never have been drawable — and the fault wasn't the rig. \`planBelt\`
+capped the **source** side (\`beltSourceMaxOut\` — one belt per output port) and never
+checked the destination at all. Outputs were enforced, inputs were decorative. Any
+player could hand-draw the same pile-up onto any machine's single input.
+
+A port is the physical place a belt lands; if the count isn't enforced, drawing it is a
+lie. \`planBelt\` now refuses a belt whose destination has no free input port
+(\`dest-full\`), with the mirror of the message the output side already had. Merging
+several lines into one machine is a merger's job, and the game doesn't have one yet.
+
+Belts already built are left alone — the check gates new ones, so nobody's existing
+factory tears itself up on load.
+
+**The stress world lost its shared storage**, which was only possible *because* of the
+missing check: it was building something no player could. Each chain now ends in its own
+storage, and the block's interconnect is what it should always have been — the **power
+grid**, with four burners and a dozen consumers on one network (106 of the 150 grids tie
+more than one burner). Every belt in the generated world now respects both port counts,
+verified rather than assumed: max belts into any one node is 1.
+
+Giving every chain its own storage put the counts *up*, not down:
+
+| | 0.43.0 | now |
+| --- | --- | --- |
+| Miners | 366 | 367 |
+| Buildings | 1281 | 1514 |
+| Belts | 1139 | 1147 |
+| Powerlines | 2095 | 2088 |
+
+![The stress world with each chain ending in its own storage, blocks still tied together by their power grids](docs/images/changelog/0.43.1-one-belt-per-port.png)
+
 ## [0.43.0] — The stress world builds the whole map, in blocks
 
 The old rig was 150 lone chains — miner → smelter → constructor → its own storage,
