@@ -18,6 +18,42 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.35.7] — 2026-07-17
+
+### Fixed
+
+- **The demo's changelog links were all dead.** The public repo holds only the build and a copy
+  of \`CHANGELOG.md\`, so every \`](docs/…)\` in it pointed at a path that exists solely in the
+  private repo — 99 of them, dead the moment GitHub renders the file. \`deploy:demo\` now reads
+  the changelog's own links and copies exactly what they point at, so the list maintains itself
+  rather than needing a hand-kept manifest. 99/99 resolve now (97 screenshots + the two
+  technical docs it references).
+
+  Because that follows links automatically, the script carries a **\`NEVER_PUBLISH\` denylist**
+  and **aborts before building** if the changelog ever links \`docs/anti-cheat.md\` (publishing it
+  would help cheaters) or \`docs/hostile-life.md\` (unreleased content). Verified by injecting a
+  link to the former and confirming the deploy refuses. Add to that list before writing a doc
+  that must stay private.
+
+### Changed
+
+- **Stale docs corrected.** An audit against the code rather than a read-through:
+  - \`CLAUDE.md\` said the save was **v27**; it is **v28**.
+  - \`CLAUDE.md\` didn't know \`terrainGpu.ts\` / \`terrainGpuShader.ts\` existed, still described
+    \`.map-terrain\` as a plain 2D canvas, and hadn't caught up with the full-bleed shell. It now
+    also records the two rules that are easy to get wrong: the CPU model stays the source of
+    truth for gameplay, and bottom-anchored map chrome must clear \`--hud-bottom\` because it
+    cannot win on z-index.
+  - \`render-plan.md\` claimed "step 1 in progress" while its own body said step 1 was complete,
+    and its Step 2 is now **superseded** — it planned to move *water* to the GPU while leaving
+    the terrain pass on the CPU, which measurement showed was exactly backwards. Marked as kept
+    for its reasoning, not as a plan, and its "noise translates almost verbatim" claim is struck
+    through as disproved.
+  - \`render-plan.md\` also references \`waterfx.ts\` / \`renderWater\` four times — **renamed to
+    \`ambientfx.ts\` / \`renderAmbient\` in 0.32.0**, before that document was even written. Noted
+    rather than silently rewritten, since the section is superseded.
+  - \`map-generation.md\`'s rendering section described the CPU painter as the only one.
+
 ## [0.35.6] — 2026-07-17
 
 ### Fixed

@@ -1,8 +1,16 @@
 # Render plan — moving the map's flow layer to canvas, and water to the GPU
 
-Status: **step 1 in progress**, step 2 planned. Written 2026-07-16.
+Status: **step 1 done. Step 2 is SUPERSEDED — see `docs/gpu-terrain.md`.** Written 2026-07-16.
 
-**Progress — step 1 is complete** (bar the layering follow-up below).
+> **Step 2 below is kept for its reasoning, not as a plan.** It scoped *water* → WebGL2 on the
+> assumption that "the CPU terrain pass still produces the field exactly as today". Measurement
+> killed that assumption: the terrain pass **is** the cost (25.7ms per camera move at 1440×900,
+> 95% of it `model.elevation`), and the animation never was. What shipped instead, in 0.35.1–4,
+> was the *terrain* on the GPU with the ambient overlay left on the CPU entirely — the opposite
+> split to the one planned here. `docs/gpu-terrain.md` has the numbers and the reasons.
+>
+> Step 2 also predates a rename: `waterfx.ts` / `renderWater` became `ambientfx.ts` /
+> `renderAmbient` in **0.32.0**, before this document was written. References below are stale.
 
 - ✅ `mapSpace.ts` — the coordinate space and belt-route geometry, extracted from `MapView.tsx`
   (~190 lines) so the DOM layers and the canvas draw from one source. The unused `_zoom` params
@@ -217,8 +225,11 @@ on rivers — on the CPU, every frame.
 
 ### Work items
 
-1. **`noise.ts` → GLSL.** `hash2` / `smootherstep` / `smoothstep` / `valueNoise` / `fbm` are
-   ~50 lines that translate almost verbatim.
+1. **`noise.ts` → GLSL.** ~~`hash2` / `smootherstep` / `smoothstep` / `valueNoise` / `fbm` are
+   ~50 lines that translate almost verbatim.~~ **This is false and was disproved in 0.35.1.**
+   fp32 cannot address a ±50,000-unit world (an ulp is ~0.006 world units), so a verbatim port
+   flickers a full-width band on ~13% of panned frames. Coordinates need double-float
+   decomposition; see `docs/gpu-terrain.md`.
 2. **`WaterField` → textures.** `kind: Uint8Array` → R8UI, `fx`/`fy` → RG16F, `shore` → R8.
    Uploaded only on camera move — the CPU terrain pass still produces the field exactly as
    today.
