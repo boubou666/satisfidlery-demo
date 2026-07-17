@@ -18,6 +18,42 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.39.0] — 2026-07-17
+
+### Added
+
+- **Keyboard shortcuts, printed on the buttons they fire.** `S` Sources, `B` Buildings,
+  `H` HUB, `I` collapses the inventory rail. Each key is shown as a badge on its own
+  control, so the shortcut is discoverable without a manual.
+
+  ![The action bar: panels that toggle, each with its key](docs/images/changelog/v0.39.0-panel-toggles.png)
+
+  **Shortcuts are data, not inline key checks** (`src/keybinds.ts`): a `KEY_ACTIONS` table
+  of id + default key + label, and a store of overrides persisted to localStorage. Nothing
+  binds a key at the call site — a control asks for its action by id (`useKeyAction`) and
+  renders its current key (`useActionKey`), so the key shown and the key that fires are the
+  same value by construction. **The planned "assign actions to keys" Options page is a view
+  over that table**: list `KEY_ACTIONS`, write with `setBind` (which unbinds whoever else
+  held the key, since two actions on one press is not a state a rebinding UI should be able
+  to produce), and every handler and badge follows immediately.
+
+  Shortcuts stay out of the way: ignored while typing, with a modifier held (Ctrl+S is
+  Save, not Sources), on auto-repeat, and while a modal owns the screen. A key is only
+  bound while its control is actually offered, so no shortcut ever does nothing.
+
+### Changed
+
+- **The World button is gone; the panel buttons toggle instead.** The world was never a
+  peer of Sources/Buildings/HUB — it's the base layer they float over, so "show me the
+  world" was only ever "close the panel", which the open panel's own button (or its key)
+  now does. `App`'s state is `panel: Panel | null` rather than a tab that included the map
+  and the drop pod, which also retires the pod's pointless button during the intro.
+
+### Fixed
+
+- **The inventory count wrapped mid-count** ("0 /" then "18") once the collapse control
+  grew a key badge and took the slack out of the rail's header.
+
 ## [0.38.2] — 2026-07-17
 
 ### Fixed
