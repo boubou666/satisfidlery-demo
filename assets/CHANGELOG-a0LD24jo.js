@@ -18,6 +18,51 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.41.7] — 2026-07-17
+
+### Fixed
+
+- **Clicking somewhere far away froze the game for a fifth of a second.** \`findPath\` runs
+  synchronously on the click, and a cell costs **25 terrain samples** (a 5×5 footprint, each
+  a noise evaluation). A haul across the world expanded enough of them to burn **194ms — a
+  twelve-frame freeze**, right at the moment the player asked for something.
+
+  Two fixes, both measured on the stress seed:
+
+  - **The cell-cost cache outlives the call.** It was built inside \`findPath\` and thrown
+    away, so every walk re-measured ground it had already measured — including *the same
+    walk twice*. It's now module-level and keyed on the seed (the ground doesn't change
+    between walks), bounded so a long session can't grow it without limit.
+  - **The heuristic stops under-selling the walk.** \`g\` is distance × the terrain
+    multiplier (up to 3× through a ford); \`h\` was plain distance, i.e. "the rest is open
+    plains". Admissible, so A* found the true cheapest route — and proved it by expanding a
+    huge bowl of cells. \`HEUR_WEIGHT\` (1.6) points it at the goal instead.
+
+  | path length | before | after | repeat |
+  |---|---|---|---|
+  | 1 500u | 6.9ms | **4.8ms** | — |
+  | 3 000u | 16.6ms | **10.1ms** | — |
+  | 6 000u | 35.7ms | **19.8ms** | — |
+  | 12 000u | 194.6ms | **86.1ms** | **31.9ms** |
+
+  The weight is 1.6 because that's what the numbers said. At 2.2 the long haul drops to
+  28ms — but a 3 000u walk grows from 57s to 63s, which trades six seconds of the player's
+  time for fifty milliseconds of ours. At 1.6 the walk stays within 1% of optimal
+  (254s → 257s).
+
+### Known
+
+- **A fast drag is now death by a thousand cuts, with no single dominant term.** Measured
+  per camera move (i.e. per frame of a drag): the terrain repaint ~0.3ms on the GPU, the
+  ambient field build 0.84ms *plus* its readback stall (play zoom only — 0.41.5 removed it
+  at altitude), and the water pass 0.4–2.3ms depending on how much sea is in view. A cloud
+  re-bake is 3.6ms but only every ~96px of pan, and enlarging its slack doesn't help: the
+  cost per pixel panned is flat, so a bigger tile just buys rarer, bigger hitches.
+
+  The remaining structural idea is to tile the ambient field in world space and cache it
+  across pans, the way the clouds now are — the field is the last thing rebuilt from
+  scratch on every camera move.
+
 ## [0.41.6] — 2026-07-17
 
 ### Fixed
