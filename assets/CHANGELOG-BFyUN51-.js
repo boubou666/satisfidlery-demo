@@ -18,6 +18,36 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.38.1] — 2026-07-17
+
+### Fixed
+
+- **The tutorial claimed the scan runs from the HUB. It doesn't.** \`toggleScan\` centres the
+  sweep on \`playerPos\` — you can prospect from wherever you've walked to, which is the whole
+  point of carrying a sensor. The copy now says so, and the demo sweeps from the **pioneer**
+  instead of a structure, so the picture can't teach the wrong thing either.
+- **The last milestone never mentioned Storage**, which is exactly what Conveyor Logistics
+  unlocks alongside the belts (\`requires: 'logistics'\`). Added a third step for it, with a
+  demo of items belting in, stacks piling up, and items belting back out.
+
+  ![The new Storage step](docs/images/changelog/v0.38.1-storage-step.png)
+
+### Changed
+
+- **A HUB milestone is now submitted at the HUB.** It always read that way — you "submit"
+  materials, and hand-crafting, the burner bank, and dismantling all require standing there —
+  but \`build()\` only ever checked affordability, so you could unlock a milestone from across
+  the map. It now goes through \`engine.canSubmit\`, which adds the \`isAtHub\` check that every
+  other HUB action already makes.
+
+  ![Away from the HUB: travel, not a dead button](docs/images/changelog/v0.38.1-submit-at-hub.png)
+
+  Away from the HUB, an affordable milestone offers **Travel here** rather than a disabled
+  button, and the cost line says why — the same move the HUB header already makes. The
+  attention cue on the HUB tab deliberately stays affordability-only (\`canBuild\`), so it still
+  lights up while you're out in the field: that's the cue to walk home, and gating it on
+  proximity would mean it only ever told you what you could already see.
+
 ## [0.38.0] — 2026-07-17
 
 ### Added
