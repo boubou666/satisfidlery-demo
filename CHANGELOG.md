@@ -18,6 +18,57 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.44.0] — The last milestone: biomass, and the tech tree
+
+The milestone chain has always dead-ended at Conveyor Logistics. **Research Facility** is
+its last link, and what it unlocks is the thing that replaces it: from here, progression
+is the **tech tree**.
+
+![The tech tree, mid-research](docs/images/changelog/0.44.0-tech-tree.png)
+
+**Research is a commitment, then a background job.** Pick a node, stand at the HUB, pay
+its cost once — and it works away on its own from then on. Live, offline, while you mine
+or walk or craft: `simulateResearch()` never touches the inventory (the cost was already
+taken), so it's automation, not a manual action, and it runs in the same catch-up path a
+miner does. One at a time, and abandoning refunds nothing — which is what makes choosing
+an order mean anything.
+
+The first node is the **Leg Exoskeleton**: +20% walk speed, everywhere, forever. Effects
+are declarative (`moveSpeedMult`) and folded from `researched` on read, so a save can't
+drift from what it has unlocked, and the next upgrade is an object in `content.ts` rather
+than a switch on tech ids. `findPath` now takes the speed to bake its times at — a walk
+already under way keeps its pace, and the next one is quicker.
+
+**It's a web, not a ladder.** A node's `requires` is a *list* and its `pos` is a grid
+slot, so the panel draws prerequisite edges under the cards and lights each one as its
+source lands. Both are load-bearing from the first node: a tree whose structure only
+appears at the second node is a tree nobody designed. One tab today (**Player Upgrades**);
+the strip is there because the content shape has always been "trees".
+
+**Fuel became a property of the item.**
+
+![Biomass in the HUB burner bank](docs/images/changelog/0.44.0-biomass-fuel.png)
+
+The other half of the milestone is **Biomass** — 4 Leaves → 1 Biomass, a **Constructor
+recipe only**, so refining fuel is something your factory does rather than something you
+do by hand. It carries 5× a leaf's energy but is pressed from 4, so the press pays for
+itself, and a full 100-unit burner load runs **10 000 s instead of 2 000**.
+
+That needed the burner economy to stop being hardcoded to leaves. Energy now lives on the
+item (`fuelJoules`), a burner records *which* fuel is loaded, and the burn rate reads it —
+so "biomass is better" is a number in `content.ts`, not a branch anywhere. A store holds
+**one type at a time** (a mixed store has no single rate to burn at); it's locked to what's
+inside until it runs dry, and the HUB bank and the placed Biomass Burner both say so with
+the same picker. Every burn stays whole-unit: a half-burnt leaf lives in `burnProgress`,
+never in `fuel`.
+
+Save is **v30** — it carries `researched`/`research` and each store's `fuelItem`. Older
+saves read as leaves-loaded with nothing researched, which is exactly what they were.
+
+Also: **Conveyor Logistics' briefing copy was missing entirely** — its card had been
+rendering the raw `hub.logistics.stakes` key since 0.42.0. Written, along with the new
+milestone's.
+
 ## [0.43.1] — One belt per port, on both ends
 
 A storage in the stress world was visibly taking four belts at once. It has one input
