@@ -18,6 +18,101 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.49.0] — Keep placing the same building
+
+![The placement toolbar's new Place: continuous toggle, mid-run](docs/images/changelog/0.49.0-continuous-placement.png)
+
+Laying out a factory used to mean re-picking a building from the radial after every single
+drop. Placement mode now has a **single ↔ continuous** toggle (default **single**, the old
+behaviour): flip it on and each drop re-arms the ghost with the same building, facing, and
+grid-snap, so you can walk a row of smelters or seed a whole block of miners without ever
+reopening the menu. Cancel (Esc / right-click / the Cancel button) still ends the run when
+you're done.
+
+It sits in the placement toolbar next to Grid and Rotate, and — like them — has a keyboard
+shortcut that only lives while you're placing: **M**. The HUB is one-of-a-kind, so it's the one
+thing that always drops singly and never shows the toggle. The choice sticks for the session,
+the same way grid-snap does.
+
+## [0.48.6] — Keep the detail through a working zoom
+
+![Icons, powerlines and belts all visible at a mid pull-back](docs/images/changelog/0.48.6-detail-at-working-zoom.png)
+
+The zoom level-of-detail was collapsing far too early: pull back to frame a couple of lakes —
+still a normal working zoom — and buildings already dropped to bare dots, belts and wires
+vanished, and machines clustered into count bubbles. Those thresholds were tuned for a *true*
+survey zoom (the whole world at once); at a mid zoom only a few dozen machines are on screen
+and culling makes the rest free, so the detail can stay. The bands are pushed out
+accordingly — icons, belts, wires, and separate markers now persist about 3× further before
+any of it simplifies, and clustering waits for an actual bird's-eye view.
+
+Two things stay tied to coming in close, on purpose. The **glow** (breathing energized wires,
+belt drop-shadows, the scrolling centerline) is a per-draw blur — cheap to draw a flat wire,
+not cheap to blur a few hundred — so above the old line the wires and belts draw flat. And the
+**live-power cues** (the amber "energized" disc glow, the kW pills, the lit/dead wire colour)
+now only render up close too: they track the grid's per-tick live state, which on a grid run
+near capacity flips every tick, so spread across the whole (now much larger) detail range they
+strobed the map. Up close you get the full lit, live-state read; pulled back you get the
+factory's shape, held steady. This also supersedes 0.48.5 — the dot-zoom strobe fix — with the
+same idea drawn at the right line.
+
+## [0.48.5] — Fix: building dots glittered at survey zoom
+
+Zoomed out far enough that machines are dots, the map twinkled: a building or Miner-Mk1 disc
+wears an energized amber glow while it's on a live grid, and on a maxed-out grid (the stress
+world especially) the per-tick demand can cross generation, flipping that "live" state — and
+the glow — every tick. On a full disc that's a legible power cue; shrunk to a dot it's just a
+strobe. The energized glow (and the constantly-changing power fields behind it) are now
+suppressed once a marker is a bare dot, matching the badges and icons already hidden there.
+Steady cues — the miner ring, the "MAX" buffer bubble, the in-range highlight — still show;
+at full zoom the live-power glow is unchanged.
+
+## [0.48.4] — Fix: belts and powerlines jittered when panning up close
+
+The flow layer (wires, belt tracks, and the items riding them) redraws on a 30fps cap to keep
+the whole-canvas re-upload cheap. But that cap was throttling *camera-driven* redraws too,
+while the terrain and the DOM markers move at the display rate during a pan — so the wires and
+belts trailed the machines they connect by up to a frame and appeared to swim, most visibly
+panning up close. The cap now governs only the animation cadence (belt-item scroll, hover
+re-test); a camera move repaints the flow layer in the same frame, exactly as the ambient
+water/cloud overlay already does. Idle cost is unchanged (the camera is still, so the 30fps
+throttle still applies), and panning up close is where the layer is cheapest anyway — most of
+it is culled off-screen.
+
+## [0.48.3] — Batch the water fill by alpha
+
+\`renderSurface\` — the water pass, the one overlay that runs every frame at play zoom — set
+\`ctx.fillStyle\` to a freshly built \`rgba(…)\` string for every wet cell, forcing the canvas to
+re-parse the colour thousands of times a second on a coastal view. The fill colour is fixed;
+only its alpha varies, quantized to the same 3 decimals as before. Cells are now bucketed by
+alpha level and each bucket is filled in one run after a single \`fillStyle\` set, with the
+colour strings served from a precomputed table and the bucket arrays reused between frames.
+Water cells never overlap, so grouping them by colour is pixel-identical (verified: coastline
+foam, depth gradient, and lake shimmer render unchanged) — it just stops the per-cell string
+build and colour re-parse.
+
+## [0.48.2] — Cache the belt render path per tick
+
+A belt's drawn polyline — nub lookups, port geometry, and a Catmull-Rom resample for a curved
+belt — was rebuilt up to three times per belt every frame: once for the belt tracks, once for
+the riding items, and again for the pointer hit-test in belt-edit mode. It depends only on
+state, which changes on the 100ms tick, not per frame, so it's now computed once per belt per
+tick and shared across all three, keyed on state identity like the other flow-layer caches.
+Purely a render-cost cut — belts, items, and hit-testing are unchanged (verified on the
+stress world: tracks, arrows, and riding chips render identically across 1,139 belts).
+
+## [0.48.1] — Cache the power network per tick
+
+\`powerNetwork()\` — the graph walk that decides which grids are live, which machines draw
+power, and what smokes — was recomputed several times for the same state every tick:
+\`simulate()\` and \`simulateBurners()\` each asked, and the map and every open panel asked
+again, each rebuilding two id maps and running a \`buildingWorking\` pass over every building.
+On the stress world that was the dominant engine cost. It's now memoized on state identity
+(single entry), exactly like the \`powerComponents\` partition beneath it — a new tick makes a
+new state object, so the cache invalidates itself. \`mapDraw\`'s own copy of this cache now
+just forwards. Behavior is unchanged; the sim is functional, so a cached result can't go
+stale under the same state.
+
 ## [0.48.0] — Load at exactly where you left off
 
 **Offline progression is gone: a save loads at the exact state it was written.** Miners,
