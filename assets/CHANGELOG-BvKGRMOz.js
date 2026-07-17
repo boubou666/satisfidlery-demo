@@ -18,6 +18,44 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.41.6] — 2026-07-17
+
+### Fixed
+
+- **Turning marker clustering off made it the most expensive thing on the map.**
+  \`clusterNodes\` walks the clusters built so far for each node, looking for one close
+  enough to join. With \`CLUSTER_SCREEN_PX = 0\` nothing ever merges — so every node becomes
+  its own cluster, and each new node scans *all of them*. **O(n²) to produce n groups of
+  one**: 3.80ms per render on the stress world's 751 markers, against 0.27ms with
+  clustering actually enabled. Off was the worst case, by a factor of fourteen.
+
+  And it ran in MapView's render body, which is upstream of everything: on every tick, and
+  on every frame of every pan. Off now means off — each node is handed back as its own
+  group, O(n).
+
+  | stress world, survey zoom | before | after |
+  |---|---|---|
+  | 20s idle (factory running) | 10.0s | **5.8s** |
+  | 400-frame drag | 36.4s | **27.3s** |
+
+  This is also what 0.41.4's note was missing. The marker memo showed no idle win because
+  the cost wasn't downstream in the marker subtree at all — it was this, in the body, before
+  the memo could skip anything.
+
+- **\`.map-world\` is promoted to its own compositor layer** (\`will-change: transform\`). Every
+  pan rewrites that one element's transform and nothing else — markers are positioned in
+  layer space — so a drag should composite a layer that's already on the GPU rather than
+  repaint what's inside it. (Bundled into the numbers above; the usual "don't leave
+  \`will-change\` on things that never move" caveat doesn't apply to the element the camera
+  lives on.)
+
+### Known
+
+- **Clustering itself is still off, and that stays a look decision** — but it's no longer a
+  performance one. Enabling it would collapse the stress world's 751 markers into ~33 count
+  bubbles (and, amusingly, make \`clusterNodes\` 14× *cheaper* than the disabled path used to
+  be); leaving it off now costs almost nothing.
+
 ## [0.41.5] — 2026-07-17
 
 ### Fixed
