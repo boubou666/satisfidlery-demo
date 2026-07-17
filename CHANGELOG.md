@@ -18,6 +18,18 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.35.8] — 2026-07-17
+
+### Fixed
+
+- **The demo deploy's link scanner couldn't tell a link from a code span.** 0.35.7's own entry
+  quotes `](docs/…)` in backticks to explain the fix, and the scanner dutifully treated that as
+  a path to publish. Harmless in itself (it warned), but the same blindness meant an entry that
+  merely *mentioned* a denylisted doc inside backticks would have aborted every deploy — a guard
+  that fires on prose is worse than no guard. Fenced blocks and inline code are now stripped
+  before links are read. Re-checked both directions: a real link to `docs/anti-cheat.md` still
+  aborts the deploy; a backticked mention no longer does.
+
 ## [0.35.7] — 2026-07-17
 
 ### Fixed
