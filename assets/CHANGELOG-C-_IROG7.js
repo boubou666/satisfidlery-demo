@@ -18,6 +18,68 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.43.0] — The stress world builds the whole map, in blocks
+
+The old rig was 150 lone chains — miner → smelter → constructor → its own storage,
+each on its own island. That's a mid-game save, and worse, it was 150 copies of the
+same isolated thing: nothing in it exercised what actually gets expensive when a
+factory grows, because nothing in it was ever connected to anything else.
+
+It now builds **blocks**. A block is up to four neighbouring deposits whose chains all
+belt into **one shared storage** and all hang off **one shared power grid** (each
+chain's burner ties to a block pole). So the load is the shape a real factory has:
+\`beltComponents\` merges a block into a single bubble at survey zoom, \`powerNetwork\`
+walks a graph with four generators and a dozen consumers on it, and a storage takes
+four belts at once.
+
+The chains got deeper and stopped being all the same. Copper now runs its full line —
+ingot → wire → cable, three machines — iron runs ingot → plate, and limestone joins
+the field on the concrete recipe it always had. Every chain is laid at whichever of
+the four quarter-turns fits its neighbours, so a crowded deposit gets turned rather
+than dropped.
+
+And the rig stopped inventing a rule the game doesn't have. It held ore nodes to its
+own 70-unit spacing, but the world puts deposits in clusters 30–85 units apart and a
+player may put a Miner Mk1 on every one of them — that check alone was throwing away a
+third of the field. Nodes now need only real ground; machines still clear everything.
+
+The result covers **366 of the world's 389 ore nodes** — the map essentially built out,
+which is the ceiling the deposit field allows:
+
+| | before | now |
+| --- | --- | --- |
+| Miners | 150 | 366 |
+| Buildings | 600 | 1281 |
+| Belts | 450 | 1139 |
+| Powerlines | 600 | 2095 |
+
+Still a save, not a mode: every belt goes through \`planBelt\` and every wire through
+\`planPowerRoute\`, and anything the planners refuse is dropped rather than fabricated.
+The save is 1.03 MB and 147 grids come up powered, none overloaded.
+
+![The stress world at a survey zoom: blocks of chains belting into shared storages, their burners wired together across the terrain](docs/images/changelog/0.43.0-stress-blocks.png)
+
+## [0.42.2] — Land on the map, and a power readout that means the whole network
+
+Two things the stress world made obvious.
+
+**A load lands on the world, not on a panel.** Opening Sources for anyone who owned
+a deposit was left over from the tab bar, where "no tab" wasn't a state you could be
+in. With panels you toggle, it just meant every load dropped a list of ore over the
+factory you came back to look at. The map is the game; a panel is something you ask
+for.
+
+**The power badge covers every grid you own.** It used to report the HUB's grid — or,
+with no HUB on a grid, whichever generator grid happened to come first — and print that
+one number as though it were the world. Fine until you build a second grid, and a lie
+after that: a map with 150 independent factories was quietly showing one of them. It
+now sums generation and draw across every live grid and says how many there are when
+there's more than one, plus a count of anything tripped or overloaded. Reset stays tied
+to the HUB's bank, because that's the only breaker it clears — a burner out in the field
+is still reset at the burner.
+
+![The power badge over the stress world, reading +4500 kW generated against −1686 kW drawn across 150 grids](docs/images/changelog/0.42.2-power-grids.png)
+
 ## [0.42.1] — 2026-07-17
 
 ### Changed
