@@ -18,6 +18,49 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.41.1] — 2026-07-17
+
+### Fixed
+
+- **Clouds are baked and scrolled, not re-derived every frame.** Look at what the cloud
+  pass samples: `fbm(worldPos − wind × speed × t)`. That's *one static pattern in world
+  space, sliding downwind* — two consecutive frames aren't two fields, they're the same
+  field translated. It was re-deriving three octaves of noise for ~80,000 cells, 20 times
+  a second, to redraw a picture it had already drawn.
+
+  It now bakes once per camera into a tile with slack around the edges, then **scrolls** it
+  — a re-bake only when the camera moves or the drift runs past the slack (at the zooms
+  where clouds exist at all, that's minutes, not frames). The zoom fade rides as a
+  `globalAlpha` at draw time rather than being baked in, so climbing through the band never
+  re-bakes. The bake itself also writes one `ImageData` instead of a **`fillRect` per
+  pixel**.
+
+  Measured after the camera settles at a survey zoom: **32 cloud passes, 0 re-derivations,
+  ~0ms** — against a full re-derivation on every one of them before.
+
+  This was the zoom-out drop's own private cost: clouds fade in *as you climb*, which is
+  precisely where everything else peaks too (nothing off-screen to cull). Stubbing the pass
+  out entirely accounted for ~38% of a survey-zoom frame; it's now ~0 without stubbing
+  anything — the clouds look and drift exactly as before.
+
+- **Markers are discs at altitude, not badges.** A marker carried its icon, its kW pill and
+  its tooltip — **8.3 DOM elements each**, laid out and reconciled every tick for every
+  machine on screen. All of it is unreadable long before a survey zoom, so past
+  `MARKER_DETAIL_SPAN` a marker is just its disc: **3.2 elements**, and the map still says
+  "something of mine is here", which is all a map at that height claims.
+
+  ![Dots, bands and wires — the map at altitude](docs/images/changelog/v0.41.1-dot-markers.png)
+
+  | stress world, survey zoom | before | after |
+  |---|---|---|
+  | elements under `.map-world` | 2161 | **821** |
+  | per marker | 8.3 | **3.2** |
+  | kW badges | 86 | 0 |
+
+  Labels stay: they're `display: none` at that zoom (no layout, no paint — only
+  reconciliation), and `.labels-hidden` reveals the hovered one, which is how a dot stays
+  identifiable. That was a deliberate feature and not worth trading for the last 10%.
+
 ## [0.41.0] — 2026-07-17
 
 ### Added
