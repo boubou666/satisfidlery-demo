@@ -18,6 +18,72 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.52.0] — Conveyor Splitters & Mergers: a Logistics tech tree, and buildings that snap onto belts
+
+![The Tech Tree's new Logistics tab: Conveyor Splitter researchable, Conveyor Merger locked behind it](docs/images/changelog/0.52.0-logistics-tech-tree.png)
+
+The tech tree grows its **second tab: Logistics**, with the game's first researched *buildings* —
+machines the milestone chain never sold you:
+
+- **Conveyor Splitter** (150 iron plates · 150 iron rods · 300 wire to research): one belt in,
+  **two belts out**. Arriving items are dealt onto the output lines **in turns**.
+- **Conveyor Merger** (double that, and it requires the splitter): the mirror — **two belts in,
+  one out**, taking from each input line in turn so neither starves.
+
+Research unlocks are a new declarative tech effect (`unlockBuilding`), folded into the same
+`isBuildingUnlocked` gate as milestones — so the two junctions simply appear in the build
+radial's **Logistics** category (next to Storage) once their node is claimed, and not before.
+
+![A Conveyor Splitter placed directly onto a running belt, cutting it in two around the junction](docs/images/changelog/0.52.0-splitter-on-belt.png)
+
+**They snap onto belts.** Both place free-standing like any machine — but move the ghost near an
+existing belt (free placement *or* grid-snap, either mode) and it **seats onto the line**, output
+facing downstream, with a dot marking the cut. Tap, and the belt is **split in two around the
+junction**: the halves keep the exact drawn geometry, the items riding it are divided between
+them mid-transit, and flow resumes straight through. No plates change hands — it's the same laid
+belt, now in two pieces.
+
+Under the hood, belts sharing an endpoint now service **round-robin** (cursors persisted on the
+building, save v32): without that, belt array order would hand every scarce item to the same
+line — measured in a seeded world, a splitter fed 60/min dealt **25/24** to its two outputs and
+a merger drained its two feeding smelters **54/54**. A junction is a tiny pass-through Storage
+(4 slots), so backpressure falls out: blocked outputs fill the grid, and the grid backs up the
+arriving belts.
+
+## [0.51.2] — Fix the avatar customizer floating inside the HUB panel
+
+![The Appearance customizer centered on a dimmed full-screen backdrop, all parts visible](docs/images/changelog/0.51.2-appearance-centered.png)
+
+The **Appearance** customizer opened as a broken half-modal: shoved to the left, its top and
+sides clipped, sitting *inside* the HUB panel instead of over the whole screen. The overlay is
+`position: fixed`, but `.hud-panel` — its ancestor — carries a `filter` (drop-shadow) and a
+`clip-path` (the chamfered edge), and **either of those makes an element the containing block for
+`fixed` descendants**. So "cover the viewport" became "cover the HUB panel", and the panel's
+chamfer clipped everything that spilled past it.
+
+The fix is a **portal**: the overlay now renders into `document.body`, outside the panel's
+containing block, so it centers on the real viewport with nothing clipped. Also plugged a related
+leak — map-tool shortcuts (S/E/D/F/G) no longer fire behind the open customizer, since
+`useKeyAction`'s modal guard now recognises `.appearance-overlay`.
+
+## [0.51.1] — Tool rail closes its gaps; map tools move off the number row
+
+![The left tool rail with contiguous Scan (S), Build (E), Powerline (D), Belt (F) and Disassemble (G) buttons](docs/images/changelog/0.51.1-tool-rail-keys.png)
+
+Two control tweaks to the left-hand map toolbar:
+
+- **No more gaps.** The five tools (Scan, Build, Powerline, Belt, Disassemble) were five
+  absolutely-placed buttons at fixed top-offsets, so a tool you hadn't unlocked yet still
+  reserved its slot — Scan and Build sat up top, then a hole where Powerlines/Belts would go,
+  then Disassemble floating below it. They're now one flex column, so a locked tool simply isn't
+  in the flow and the rail closes up.
+- **Off the number row.** The map tools were on `1`–`5`; the digits `1`–`9` are being reserved
+  for something coming, so the tools move to letters under the left hand: **Scan S · Build E ·
+  Powerline D · Belt F · Disassemble G**. Scan wanted `S`, which the Sources panel held, so
+  Sources moves to `Q`. (Bindings are physical keys, so on an AZERTY keyboard the Sources badge
+  reads **A** — the label is whatever that physical key types on your layout; the map-tool keys
+  are on positions that read the same on QWERTY and AZERTY.)
+
 ## [0.51.0] — Save, or drop it — your call on the way out
 
 ![The pause menu's "Save this game before leaving?" popover, offering Save & main menu, Leave without saving, and Cancel](docs/images/changelog/0.51.0-save-or-drop.png)
