@@ -18,6 +18,88 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.41.4] — 2026-07-17
+
+### Fixed
+
+- **Panning re-rendered every marker to produce identical DOM.** Markers are positioned in
+  *layer* space and \`.map-world\`'s transform is what moves them, so a pan's only real work
+  is that transform — yet \`setView\` fires per pointer event, re-rendering all of MapView
+  and reconciling hundreds of marker subtrees back to exactly where they were.
+
+  The marker layer now renders through a \`MarkerLayer\` memo, skipped whole on an unchanged
+  **signature** — a string of everything the markers draw *and* everything their handlers
+  read (the second half matters: a skipped render keeps the previous closures, so \`onNode\`'s
+  \`placing\`, \`placeOrient\` and the player's position are all in there). The cull window is
+  **quantized to a 400px chunk** for the same reason: an exact window would change the
+  visible set — and so the signature — on every pointer event, which is the one thing this
+  is here to avoid.
+
+  A 400-frame drag on the stress world: **37.4s → 33.8s**. That's a floor, not a ceiling —
+  the headless renderer has no GPU, so the CPU terrain painter (~25ms/frame) dominates the
+  measurement and dilutes the ratio. On real hardware the terrain is ~0.3ms and React's
+  share is proportionally far bigger.
+
+  Verified honestly, because a stale marker is a worse bug than a slow one: pressing \`3\`
+  still lights 11 nodes \`.pickable\`; and cutting the grid (Options → free fuel off) takes
+  powered markers 10 → 0 and kW badges 5 → 0, so live network state still flows through
+  the memo.
+
+### Known
+
+- **Idle gains nothing from this** (measured: 8.8s vs 8.7s over 20s of survey-zoom idle),
+  which corrects an earlier claim. The 0.41.2 note attributed ~1.4s of a survey-zoom frame
+  to reconciliation on the strength of a tick-on/tick-off A/B — but stopping the game loop
+  also stops smoke, item movement and every machine's working state, so that number was
+  never purely React's. The per-tick cost that remains is MapView's own render body (the
+  node list, the clustering pass, the signature itself), not the marker subtree.
+
+## [0.41.3] — 2026-07-17
+
+### Fixed
+
+- **Panning re-baked the clouds every frame** — a regression from 0.41.1, which keyed the
+  cache on the camera's world origin. But a pan doesn't change the cloud field any more
+  than time does: it changes *which part of it you're looking at*, which is an offset, not
+  a re-bake. The tile is a world-space patch, so the draw now offsets by what the camera
+  has panned since the bake (on top of the wind's own drift), and only re-bakes once the
+  viewport would run off the tile's slack. Keying on \`ox\`/\`oy\` made every frame of every
+  drag re-derive ~110k noise samples — worse, at altitude, than the per-frame version it
+  replaced.
+
+## [0.41.2] — 2026-07-17
+
+### Fixed
+
+- **The flow layer draws flat from altitude — no glow, no lift, no scrolling dash.** Every
+  energized wire was setting \`shadowBlur\`, and every belt band a drop shadow. **A canvas
+  shadow is a blur pass per draw call**, so a survey zoom — where all 600 wires and 450
+  bands are on screen at once — was over a thousand blur passes per frame. \`mapDraw\` already
+  knew: its item chips are pre-baked bitmaps precisely because *"setting shadowBlur per item
+  would put a blur pass in the hot loop"*. The wires and bands never got the memo.
+
+  Past \`FLOW_GLOW_SPAN\` (1600 — deliberately the same line as the items and the marker
+  detail) the layer draws flat: the glow, the lift shadow, the belt's scrolling centerline
+  and its bend dots all go. All four are close-up cues — "this wire is live", "this band
+  sits above the ground", "stuff moves this way" — and none survives being seen from height;
+  the scrolling dash is sub-pixel long before it. Survey-zoom wall clock on the stress
+  world: **7.9s → 7.0s**.
+
+- **Smoke stopped walking the map to draw nothing.** The plume pass fades out with zoom
+  (correctly), but it still built its stack list first — a world position and a working-state
+  lookup for all 600 machines, 60 times a second, to then skip every one. It now leaves as
+  soon as the fade hits zero.
+
+### Known
+
+- **The remaining survey-zoom cost is React, not the canvas.** Measured by stopping the game
+  loop outright: 7.0s → 5.5s. The engine itself is ~1ms/tick, so that ~1.4s is reconciliation
+  — the map rebuilding its marker layer ten times a second because \`simulate()\` hands it new
+  \`sources\`/\`buildings\` arrays every tick, even when nothing a marker draws has changed. The
+  fix is to memoize the layer on a signature of what it actually renders; the catch is that
+  such a signature has to mirror \`renderNode\` exactly or a marker goes quietly stale, so it
+  wants doing deliberately rather than in passing.
+
 ## [0.41.1] — 2026-07-17
 
 ### Fixed
