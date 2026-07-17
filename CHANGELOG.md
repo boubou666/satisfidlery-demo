@@ -18,6 +18,15 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.47.7] — A heavier laser
+
+![The reinforced beam slams into the hull](docs/images/changelog/0.47.7-laser-power.png)
+
+The beam that hits the ship went from a thin red line to a heavy weapon: a **thick white-hot
+core** cooling to red down its length, a layered **bloom** that pulses (drop-shadows, so the
+glow survives the beam's clip reveal instead of being cropped), a bigger, brighter **impact**
+on the hull, and a warm **screen flash** at the moment it connects.
+
 ## [0.47.6] — Angle the ejected pod along its trajectory
 
 The real problem with the ejected pod wasn't where it was going — it was that it flew there
