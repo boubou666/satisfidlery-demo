@@ -18,6 +18,45 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.42.1] — 2026-07-17
+
+### Changed
+
+- **The belts go with their bubble.** Once a factory draws as one marker
+  (`MARKER_CLUSTER_SPAN`), its belts are *inside* it — and every belt is, because a belt is
+  what defines the group. Drawing them was scribbling the wiring of something the map had
+  already reduced to a dot.
+
+  Which empties the flow layer entirely up there: ports at 900, items at 1600, wires and
+  poles at 2500, belts at 3000, and smoke fades itself out. So the layer now **clears its
+  canvases once and stops touching them** — a canvas is re-uploaded whole whenever it's
+  written, so re-clearing a blank one costs exactly what drawing on it does. Verified by
+  sampling the pixels: both flow canvases read empty at a survey zoom.
+
+- **The water pass gives up at 8% strength, not 1%.** A survey zoom sits at ~6% — invisible,
+  but the pass didn't know: it walked every cell, and the field behind it cost a GPU pass and
+  a readback stall, to render nothing anyone can see. The fade runs 1 → 0 across a wide band,
+  so ending it at 8% moves the visible cutoff by a few world-units-per-pixel and switches the
+  whole apparatus off at altitude instead of idling at 6%.
+
+- **Clouds repaint at 4fps once they're alone** (`CLOUD_ONLY_FPS`). The overlay is a
+  viewport-sized canvas, so 20fps of it costs the same whether it's painting a shimmering
+  coastline or a shadow that moved a fraction of a pixel — and at a survey zoom a cloud
+  drifts **0.7 screen px per second**. 20fps was redrawing the whole screen to move a shadow
+  by three hundredths of a pixel. A camera move still repaints in its own frame, so a pan
+  never shows stale weather.
+
+  Stress world at a survey zoom (real GPU, real frames): **50ms → 33ms/frame (20 → 30fps)**.
+  Play zoom is untouched — the water still runs at full rate where you can see it.
+
+### Known
+
+- **In this dev environment each full-screen canvas layer costs ~16ms/frame just to
+  composite**, written or not: hiding the ambient canvas at a survey zoom takes the frame
+  from 50ms to 16.7ms even with the flow canvases already blank. That's WSLg compositing in
+  software and almost certainly doesn't happen on a native GPU — it's why the numbers above
+  move less than the work removed would suggest. The work removed is real either way.
+
 ## [0.42.0] — 2026-07-17
 
 ### Added
