@@ -18,6 +18,74 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.40.0] — 2026-07-17
+
+### Added
+
+- **Stress test** on the main menu: a generated world with the map running flat out —
+  **150 production chains**, each an ore node with a Miner Mk1 belted through a Smelter,
+  a Constructor and into a Storage, on its own Biomass Burner and pole. That's 150 miners,
+  600 buildings, 450 belts, 600 powerlines and 150 poles, all working at once.
+
+  ![The stress test on the main menu](docs/images/changelog/v0.40.0-stress-menu.png)
+
+  ![Two of the 150 chains, running](docs/images/changelog/v0.40.0-stress-world.png)
+
+  **It's a save, not a mode.** Every entity is ordinary state a player could have built,
+  so nothing downstream needs a special case — and the numbers it produces are about the
+  game rather than about a rig. The layout is authored, but every belt goes through
+  `planBelt` and every wire through `planPowerRoute`, the same planners the player's own
+  clicks use: a cluster the planners refuse (too long a run, a full intake, a taken port)
+  is **dropped rather than fabricated**. A generator that hand-rolled its own `Belt`
+  objects would happily mint impossible ones, and every bug they caused would be a bug in
+  the test rig.
+
+  Each cluster is sized to run itself: a 30 kW burner against 15 kW of draw (miner 5 +
+  smelter 4 + constructor 6), wired burner → pole → miner/smelter/constructor, which is
+  exactly the pole's four intakes — a building only has two, which is why the burner
+  doesn't wire direct. The menu turns the **free-fuel cheat** on with it so the burners
+  never drain; the button says so, because that setting outlives the session.
+
+  The world is a **fixed seed**, so two runs compare. It lands in its own slot, outside
+  the three the board shows, and deliberately leaves `lastSlot` alone: it can neither
+  overwrite a real save nor hijack Continue. It's regenerated on each click rather than
+  read back, so it always reflects the code as it is now.
+
+### Fixed
+
+- **A generated world's inventory grid was short six slots** until its first reload. The
+  slot count is earned per milestone and grown by `build()`, which a generated save never
+  calls — so the rail showed the starting capacity, and `deserializeInventory` silently
+  corrected it on load. Found by the stress world, which is the point of it.
+
+## [0.39.3] — 2026-07-17
+
+### Fixed
+
+- **The inventory's help card opened in the wrong place, with its left half shorn off.**
+
+  ![Before: the help card, misplaced and sliced](docs/images/changelog/v0.39.3-help-popover-before.png)
+
+  It was already doing the right thing — computing viewport coordinates from the `?`
+  button's rect and using `position: fixed` "so it escapes the sidebar's clipping", as
+  its own comment said. **The rail's drop shadow silently took that away.** A `filter`
+  makes an element the containing block for its fixed-position descendants, so `right`
+  and `top` quietly stopped meaning the viewport and started meaning the rail; the
+  chamfer's `clip-path` then sliced off whatever hung over the edge. Measured: the `?`
+  button at x=995, the card at x=711–971 — anchored to nothing at all.
+
+  And the shadow can't just go back to `box-shadow`: it's a filter *because* filters
+  apply after clipping, which is what lets the shadow follow the chamfer instead of being
+  cropped square with it. So the popovers move out instead — they now render through a
+  `Portal` into `<body>`, where `fixed` means the viewport again and nothing clips them.
+
+  ![After: anchored to the button, whole](docs/images/changelog/v0.39.3-help-popover-after.png)
+
+  **The hovered-item card and the split-stack popover had it too** — same rail, same
+  filter, and the split one is interactive, so landing off-target was worse than ugly.
+  All three are portalled. Anything anchored to a rect that must escape its panel wants
+  the same treatment; `Portal.tsx` carries the explanation.
+
 ## [0.39.2] — 2026-07-17
 
 ### Fixed
