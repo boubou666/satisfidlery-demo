@@ -18,6 +18,32 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.38.2] — 2026-07-17
+
+### Fixed
+
+- **The map node popover hid behind the inventory rail.** Tap a node on a narrow window
+  and the card's right-hand half — Build Miner Mk1, Collect — was simply gone.
+
+  ![Before: the card's buttons are behind the rail](docs/images/changelog/v0.38.2-popover-before.png)
+
+  It clamped itself to the *viewport*, but the viewport isn't the free space: the
+  inventory rail and an open side panel float over the map at z 30, while the whole map
+  stack sits at z 0. The card can't out-z-index them — and it shouldn't cover them
+  anyway, because the card takes drag-and-drop from the inventory, so both have to be on
+  screen at once. It now measures those boxes and clamps into the space they leave.
+
+  ![After: it stops 8px short of the rail](docs/images/changelog/v0.38.2-popover-after.png)
+
+  Only a box the card actually overlaps *vertically* constrains it, so a node up in a
+  corner still centres on itself while the rail sits lower down; which side a box pushes
+  the card toward comes from which half of the viewport that box occupies (the rail
+  pushes left, an open Sources/Buildings/HUB panel pushes right). The rects are measured
+  rather than derived from \`--inv-rail\`, since the rail's height changes when it's
+  minimized and only a real rect knows whether the card collides at all. If the two
+  lanes leave no room — a narrow window with a panel open, where the map is fully covered
+  anyway — it falls back to the old viewport clamp: half-covered beats mostly off-screen.
+
 ## [0.38.1] — 2026-07-17
 
 ### Fixed
