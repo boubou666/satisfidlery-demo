@@ -18,6 +18,43 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.57.0] — Screws and the Bolted Plate: the Bonder gets a chain of its own
+
+The Bonder's recipe is no longer a borrowed one. Two new items give it a chain
+built for two input ports:
+
+- **Screw** (new item + icon) — a Constructor recipe: 1 iron rod turns into
+  4 screws. Unlocked by the Research Facility milestone, alongside the tech tree
+  whose Bonder is its only consumer.
+- **Bolted Plate** (new item + icon) — the Bonder's first recipe: 3 iron plates
+  + 8 screws bolt into one rigid slab. Plates off one line, screws off the
+  other — the canonical two-input bond, and structural stock for the heavier
+  machines to come. (It replaces 0.56.1's Portable Miner recipe, which returns
+  to being the Equipment Workshop's hand job.)
+
+Verified headlessly on the stress world through live-placed machines: the screw
+recipe is hidden without the \`research\` milestone and offered with it; a
+Constructor fed 6 rods produced exactly 24 screws; a Bonder fed 9 plates +
+24 screws produced exactly 3 Bolted Plates, draining both buffers to zero.
+
+![The Bonder tech card, its recipe now the Bolted Plate](docs/images/changelog/0.57.0-screws-bolted-plate.png)
+
+## [0.56.1] — The Coil is cut; the Bonder builds Portable Miners instead
+
+0.56.0 invented a new item for the Bonder's first recipe; that was scope nobody
+asked for, so the Coil is gone — item, icon, and copy. The Bonder now earns its
+two input ports with parts the game already had: its recipe is the **Portable
+Miner** (3 iron plates + 2 iron rods → 1), the Equipment Workshop's hand recipe
+automated — same parts, same yield, but powered and belt-fed, so the machine that
+mines can itself come off a line. The workshop keeps the recipe for the
+pre-Bonder game.
+
+Verified headlessly on the stress world: the coil id resolves to no item, the
+Bonder's recipe list is exactly \`portable-miner\`, and a placed Bonder fed
+9 plates + 6 rods turns them into exactly 3 miners over a 30 s simulate.
+
+![The Bonder tech card, its recipe now the Portable Miner](docs/images/changelog/0.56.1-bonder-miners.png)
+
 ## [0.56.0] — The Bonder: two streams in, one composite out, behind a new Assembly tree
 
 A third tech tree, **Assembly** ("join the flows"), whose root unlocks the **Bonder** —
