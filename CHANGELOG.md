@@ -18,6 +18,138 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.52.7] — No phantom junctions on a split belt, and no dead-end port stubs
+
+![A split belt at close zoom: small bend dots, the north-port belt elbowing cleanly into its diagonal, the south-port belt routing under and up](docs/images/changelog/0.52.7-split-clean-zoom.png)
+
+Placing a splitter on a belt could leave the result looking like **three machines and a broken
+line**. Two renderer bugs, both magnified by the split's corridor-pinning bends:
+
+- **Bend dots inflated with zoom.** The bend ring's stroke width scaled with the camera — a
+  quirk inherited 1:1 from the old SVG layer (see `docs/render-plan.md`) that a close zoom blew
+  up into machine-sized black blobs; the split's two pinned bends then read as two extra
+  junctions. The ring is now screen-fixed like every other stroke on the flow layer.
+
+- **Leads drew toward open air.** A port lead assumes the route continues out along the port's
+  facing — but a split belt's corridor bend sits BESIDE the junction, behind its flank port, so
+  the lead drew a dead-end prong the route immediately hairpinned over. A lead is now drawn
+  only when the first routed target actually lies ahead of the port; otherwise the belt turns
+  at the nub directly.
+
+## [0.52.6] — A belt out of a flank port no longer doubles back over its machine
+
+![A splitter's south-port belt crossing the gap below it and climbing at the destination column into the east storage](docs/images/changelog/0.52.6-mixed-elbow.png)
+
+Routing a belt out of a junction's flank port to a destination **behind that port's facing**
+(east-and-up out of a south port, say) drew the route's one elbow at the stub's own column — so
+the line left the port, then ran straight back UP through the machine to reach the
+destination's row. The mixed-axes elbow in `beltRenderAnchors` now checks whether the
+destination actually lies along the out port's facing: when it doesn't, the turn moves to the
+destination's column/row instead, so the run crosses the gap on the stub's row and only climbs
+at the far end. Applies to the live draft and the committed belt alike (same anchors).
+
+## [0.52.5] — Split belts hug their corridor; dismantling tears its belts down; the placement bar wraps
+
+![A belt split by a junction still reading as one continuous line, the downstream half elbowing straight back onto the corridor](docs/images/changelog/0.52.5-split-elbow-corridor.png)
+
+Three fixes from playtesting the junctions:
+
+- **Split belts stay on the line the player drew.** The junction's ports sit on its flanks, so
+  the downstream half of a split belt used to leave the flank port and elbow at the *far
+  machine's row* — a huge dogleg across the map. `splitBeltAt` now pins each half back onto the
+  original corridor with an **on-path waypoint one grid-step from the cut** (skipped when a
+  player bend already sits closer), so the route turns straight back onto the drawn line beside
+  the junction and the split still reads as one belt.
+
+- **Dismantling a machine tears its belts down with it** — plates and cargo refunded, like
+  removing the belt by hand. Belts used to survive as "dangling" runs on purpose, but stable
+  ids mean a dangling belt can never legally reconnect — while it silently kept occupying the
+  *other* machine's port and rendered as a barely-findable stub. That was the "this building
+  won't take a new belt" mystery: the port was full with a belt nobody could see. Verified
+  end-to-end: remove/re-belt, split + remove halves + re-belt into the junction, and
+  dismantle + replace + re-belt all pass against the live store. (Same treatment for a
+  dismantled Miner Mk1's outgoing belts.)
+
+- **Port bookkeeping during a lay.** The belt currently being strung now counts against its
+  ports (a second belt could be planned onto the same output mid-lay), and a junction split
+  during a lay can no longer mint a duplicate belt id.
+
+![The placement bar with its four controls wrapped onto two rows, all inside the box](docs/images/changelog/0.52.5-placement-bar-wraps.png)
+
+Also: the **placement bar's buttons stay inside the box** — with four controls (Grid · Place ·
+Rotate · Cancel) the row outgrew the bar's max-width and flex children never shrink below their
+content, so Cancel poked out the right edge. The controls row now wraps.
+
+Under the hood for future work: dev builds expose the store to the headless verification rigs
+(`window.__game`, dev-only), so drivers exercise real actions instead of synthetic pointer
+events.
+
+## [0.52.4] — Junctions become Ts, and belt-seating obeys the grid
+
+![A splitter with its outputs leaving north and south, a merger fed from north and south, and a grid-snapped junction seated on a belt](docs/images/changelog/0.52.4-junction-t-ports.png)
+
+Two junction refinements:
+
+- **T-shaped ports.** A splitter's two outputs now leave **perpendicular to its input**
+  (north + south flanks instead of stacked on the east face), and a merger's two inputs arrive
+  perpendicular to its output — the machines read as junctions, not as wider processors. Port
+  seating is now declarative per building (`portSides` on the def); every consumer — nubs,
+  chevrons, belt leads, the placement ghost, the belt-to-port assignment — resolves each port's
+  own side, so a rotated junction turns all four sides together. The assignment that keeps two
+  belts off one nub now matches belts to ports by **facing alignment** (a junction's ports point
+  different ways, not just different slots).
+
+- **Grid-snap while seating on a belt.** Dropping a junction onto a belt with grid-snap on now
+  quantizes the seat point: the found point is snapped to the lattice and re-projected onto the
+  belt, so on an axis-aligned run the junction lands exactly on the grid like any other snapped
+  building — verified: a tap at world (−67, 563) committed at exactly (−80, 560). Finding the
+  belt still uses the raw cursor, so snapping never makes a belt harder to grab.
+
+## [0.52.3] — Each belt on a junction takes its own port
+
+![A splitter's two belts leaving from two separate output nubs, and a merger's two belts arriving on two separate input nubs](docs/images/changelog/0.52.3-junction-port-seating.png)
+
+A splitter's two outgoing belts (and a merger's two incoming ones) were both drawn plugging into
+the **same port nub** — the renderer always seated a belt on the *first* port of a side, which
+was invisible while every machine had one port per side. Belts still don't store a port (a port
+is render seating, not simulation); instead each side's belts are now **matched to slots by
+geometry** (`beltPortAssignments`): ports stack along the side's axis, each belt is scored by
+where its route heads, and the sorted belts take the sorted slots — the belt toward the upper
+machine gets the upper port, and two belts can never share or cross.
+
+While **drawing** a belt, the draft now plugs into the **free port nearest the mouse** — leaving
+a splitter, the ghost hops between its open outputs as you aim (a placed bend pins it); landing
+on a merger, the snap locks onto the open input closest to the cursor. A destination whose
+inputs are all taken no longer offers a snap it would refuse to commit.
+
+## [0.52.2] — Tech-tree edges clip to the gap between cards
+
+![The Logistics tab with the prerequisite line visible only in the gap between the two cards](docs/images/changelog/0.52.2-tech-edge-clipped.png)
+
+0.52.1's stacking fix wasn't enough: a **locked card is translucent** (`opacity: .55`), so the
+edge underneath it showed straight through its face — z-order can't hide a line from a
+see-through card. Edges are still *aimed* center-to-center (so they point into a card at any
+height), but the drawn run is now **clipped to the segment between the two cards' borders** —
+measured, not assumed: the line's rendered rect spans exactly the 30px gap, touching both
+borders.
+
+Fixing it surfaced a second, older bug: `useNodeCenters` only observed the cards that existed
+when the panel mounted, so **switching tabs never re-measured** — the new tab's edges only
+appeared because the grid happening to resize fired the observer, and a card growing later (a
+research starting) would leave its edges pointing at stale geometry. The hook now re-runs per
+tree, re-measuring and re-observing the tab's actual cards.
+
+## [0.52.1] — Tech-tree edges go back under the cards
+
+![The Logistics tech tab with the prerequisite line hidden behind the cards, visible only in the gap](docs/images/changelog/0.52.1-tech-edges-under-cards.png)
+
+The prerequisite lines were drawing **across the card faces** — right through the splitter's
+description. The edges SVG is absolutely positioned inside the grid and the cards were plain
+in-flow items, and a positioned box always paints above an in-flow one regardless of DOM order.
+The Player tree never showed it (one node, no edges); the Logistics tree is the first with an
+edge. Cards are now positioned themselves, so they paint over the SVG and an edge surfaces only
+in the gap between cards — the "web" look the panel was designed around.
+
 ## [0.52.0] — Conveyor Splitters & Mergers: a Logistics tech tree, and buildings that snap onto belts
 
 ![The Tech Tree's new Logistics tab: Conveyor Splitter researchable, Conveyor Merger locked behind it](docs/images/changelog/0.52.0-logistics-tech-tree.png)
