@@ -18,6 +18,77 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.54.0] — A loading screen holds the door while a save comes up
+
+![The loading screen: the Aphelion logo over an opaque dark cover, with LOADING and an orange bar mid-sweep](docs/images/changelog/0.54.0-loading-screen.png)
+
+Opening a save was one long synchronous stall — deserialize the slot, tear down the
+menu, mount the whole game, compile the terrain shaders, paint the first frame — and
+the player watched all of it as a frozen click on the menu. Nothing was wrong with the
+work; it just had nothing in front of it.
+
+- **Loads are two-phase now** (\`store.loadGame\`): the click stamps \`loadingSlot\`,
+  which mounts an opaque full-screen **loading screen** (logo, label, a sweeping
+  accent bar), the browser gets one paint to put it up, and only then does the heavy
+  stretch run behind it. The final \`set\` clears the flag in the same commit that
+  lands the loaded state — and since mount effects run before the browser paints, the
+  cover stays up until the game's first real frame is ready, with no timing to tune.
+- **Every door in**: Continue, the menu's Load game board, and the pause menu's
+  in-game slot switch all run through the same path. The **stress test** gets the
+  same treatment (\`startStressTest\`) — generating that world is the longest freeze in
+  the app, and it now happens behind the cover instead of on the button.
+- The bar's sweep animates \`transform\` only, so the compositor keeps it moving while
+  the main thread is busy doing the very work the screen exists to cover; under
+  \`prefers-reduced-motion\` it holds still. The cover sits above everything
+  (z 150) and blocks input, so a mid-load click can't land on either world.
+- A present-but-corrupt slot drops the cover and stays put; an absent slot still
+  answers the caller synchronously (\`hasSlot\` — presence only, no parse), so the
+  menu's "stay open on failure" behaviour is unchanged.
+
+## [0.53.2] — A junction seats anywhere on the belt, not just its magic middle
+
+![A Conveyor Splitter ghost seated on the belt between a Storage and an existing splitter, in a tight machine row with items riding the line](docs/images/changelog/0.53.2-junction-seat-clamp.png)
+
+0.53.1 put the junction ghost on the belt the player sees, but in a built-up block it
+still refused to snap along most of the line. The cause was the end-stub rule: a cut
+must leave at least one item-length (24 wu) of belt on each side, and the seat
+*refused* any spot whose stored-path mapping fell outside that window. The two
+geometries compress unevenly — on a split half (a belt that already ends at a
+junction), the legal window could be **2 wu of a 50-wu drawn run**, so measured
+against the drawn line only ~6% of it would seat, and a factory full of junctions is
+a factory full of split halves. The refusal was answering the wrong question: the
+player is choosing *where the machine stands*, not where the invisible stored cut
+lands.
+
+- **The cut now slides instead of refusing** (\`clampCutToPath\`): the mapped cut is
+  clamped into the legal window, so both halves still hold the item they'd carry, and
+  every point of the drawn line seats — 100% in the replica scan, up from 6%. Only a
+  belt genuinely too short to cut (under two item-lengths) refuses. The slid cut is
+  invisible: the machine stands at the drawn seat point, and both halves re-render
+  onto the junction's port nubs regardless.
+- **The grab radius covers the chips** (14 → 24 screen px): a loaded belt visibly
+  *is* its riding item chips, which are 22 px wide at any zoom — aiming at a chip's
+  edge used to miss the center line entirely and read as "won't snap".
+
+## [0.53.1] — The splitter ghost seats on the belt you can see
+
+![A Conveyor Splitter ghost seated exactly on the drawn belt's vertical run, halfway between the miner's bend and the smelter](docs/images/changelog/0.53.1-junction-seat-on-drawn-belt.png)
+
+Hovering a splitter/merger near a belt could seat the ghost well OFF the drawn line —
+floating in open grass beside the belt, as if snapped to a belt that isn't there. It
+was: a belt has two geometries. The stored path runs node-center → bends → node-center
+(what the sim measures), but the map draws the route re-seated onto the machines' port
+nubs — and on an angled belt the two can elbow at *different corners*, up to a whole
+leg apart. The junction seat hit-tested the stored path, so the ghost snapped to an
+invisible line the renderer never draws.
+
+Now the seat hit-tests the **rendered** polyline — the ghost lands on the belt the
+player is pointing at, and the machine commits exactly where the ghost stood. The cut
+still happens on the stored path (mapped back from the seat point, nearest-point), so
+split lengths, riding items, and end-stub refusals all measure the same geometry they
+always did — verified in a replica script: old seat landed 100 wu off the drawn line,
+new seat lands on it, and the split halves still sum exactly to the belt's length.
+
 ## [0.53.0] — Shortcut bar: hover a tool, press 1–9, it's yours
 
 ![The shortcut bar at the bottom of the map: six assigned slots (belt, powerline, smelter, constructor, miner, storage) with their digit badges, under the open build radial](docs/images/changelog/0.53.0-shortcut-bar.png)
