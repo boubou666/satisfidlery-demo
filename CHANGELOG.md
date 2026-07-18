@@ -18,6 +18,207 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.53.0] — Shortcut bar: hover a tool, press 1–9, it's yours
+
+![The shortcut bar at the bottom of the map: six assigned slots (belt, powerline, smelter, constructor, miner, storage) with their digit badges, under the open build radial](docs/images/changelog/0.53.0-shortcut-bar.png)
+
+Placing the fifth smelter meant re-opening the build radial and re-walking its submenu
+every time. Now the map has a **shortcut bar** — nine digit slots, always on screen at
+the bottom centre:
+
+- **Assign by hovering**: point at a building (or the Miner Mk1) in the build radial —
+  or at the Belt / Powerline tool buttons — and **press 1–9**. The hovered tool lands in
+  that slot; while something assignable is under the cursor, the empty slots pulse to
+  show where it can go. Unaffordable radial nodes still assign — the slot remembers the
+  tool, not your wallet.
+- **Activate by digit** (or by clicking the slot): a building arms its placement ghost,
+  belt/powerline toggle their mode, and pressing the digit again backs out — every slot
+  is a toggle, like the tools themselves. A slot whose tool can't fire right now
+  (unaffordable, mid-travel) dims and no-ops; the active tool's slot lights up.
+- **Right-click clears** a slot; assigning over an occupied slot overwrites it.
+- **Per save, and saved** (v33): each world keeps its own bar, like its own factory.
+  The digit keys are ordinary rebindable actions in the keybinds table — bound by
+  physical position (`Digit1`–`Digit9`), so they sit on the number row on every layout,
+  and the badge on each slot prints whatever the player's keyboard actually types there.
+
+The digits were reserved for exactly this since 0.39.0; the keybinds module's "coming
+feature" note finally cashes in. Verified headlessly end-to-end: assignment from the
+radial and both tool FABs, digit toggling placement/belt/power on and off, the
+no-toggle-while-assigning guard, right-click clear, and the save round-trip (16/16
+checks).
+
+## [0.52.14] — Junctions are pass-throughs, not warehouses
+
+![The Conveyor Splitter card: no grid, no Quick Sort — just "Items pass straight through", between two Storage cards that keep theirs](docs/images/changelog/0.52.14-junction-passthrough.png)
+
+The Conveyor Splitter and Merger were Storage buildings with a 4-slot grid, and the belt
+engine treated them exactly like warehouses: every arrival went *into* the junction and
+outputs pulled back *out* of it. So a junction quietly swallowed up to four full stacks —
+the screenshot that prompted this had 700 leaves sitting inside a splitter — and a blocked
+output never backed the line up until all that buffer filled.
+
+Now **a junction is a pure pass-through with no inventory**:
+
+- An arriving item hands off **directly from the inbound belt onto an outbound belt**,
+  dealt by the same `rrOut` round-robin cursor as before (fair alternation, a blocked
+  output keeps its turn) and still paying the outbound belt's entry pacing — a splitter
+  can't exceed belt throughput.
+- **If no output can take the item, it waits on the inbound belt** and the line packs up
+  behind it: backpressure, Satisfactory-style, instead of buffering.
+- **The card shows no grid** — no slots, no Quick Sort, no hand access (`canReachStorage`
+  refuses junctions, so the store's transfer actions do too). It states what it is, and
+  Dismantle stays.
+- **Old saves lose nothing**: the grid survives underneath, the outputs drain whatever a
+  previous version buffered inside through the normal storage-emit path (the card notes
+  "{n} items … clearing onto the output lines" until it empties), and nothing ever fills
+  it again.
+
+Verified in the running sim: a fed splitter deals 4/4 to its two outputs with its grid at
+zero; a merger passes both feeds through, grid at zero; a 30-item legacy stock drains onto
+the line; and a line clogged at a smelter backs up on the belts (4 inbound, 4 outbound
+waiting) with the junction still holding nothing.
+
+## [0.52.13] — Reach badges: the marker itself says what you can do from here
+
+![Four buildings at different distances: filled hand on the near smelter and the storage, hollow eye on the mid smelter and HUB, nothing on the far one](docs/images/changelog/0.52.13-reach-badges.png)
+
+Reach used to be something you discovered by tapping — the only standing cues were the ring
+around the avatar and a subtle accent border at arm's length. Now every interactive marker
+(building, deposit, HUB) wears a small corner badge stating its relationship to *you*:
+
+- **Filled hand** — every action on its card works at this distance. That's arm's length for
+  machines and deposits, and the full 240 u transfer ring for a Storage — the badge folds in
+  the per-building rules (`canReachStorage`), so a warehouse across the yard correctly reads
+  as usable while the smelter next to it reads as view-only.
+- **Hollow eye** — a tap opens the card from here, but hands-on work needs the walk.
+- **No badge** — tapping walks you over.
+
+Each badge carries a tooltip saying the same in words. They live in the bottom-left corner
+(the miner badge owns bottom-right), hide past the marker-detail zoom band (an interaction
+cue, not survey data), and step aside while belt/power/disassemble modes own the tap with
+their own pickable highlights. Two new `UiIcon` glyphs (`hand`, `eye`) per the no-emoji rule.
+
+## [0.52.12] — Storage works at card-opening range
+
+![The Storage card open from 150 units away: grid usable, Quick Sort enabled, only Dismantle still out of reach](docs/images/changelog/0.52.12-storage-at-range.png)
+
+Opening a Storage's card from across the yard (0.52.11) showed you a warehouse you couldn't
+touch — every stack disabled until you closed the card and walked over anyway. Now **storage
+transfers work at the full `NODE_OPEN_RADIUS` ring (240 u)**: a warehouse is logistics, not
+operation, so if you can see its card you can swap stacks with it.
+
+- All five hand transfers widen together — take a stack out, drop one in, rearrange cells,
+  right-click split, and Quick Sort — via one predicate (`canReachStorage` in the engine),
+  which both the store's gates and the card's controls read, so the buttons shown and the
+  actions allowed can't disagree.
+- **Dismantle keeps the normal building reach**: the card gates it separately (`canTouch`),
+  matching the store's own teardown check — no button that clicks through to a no-op.
+- Belt junctions (splitter/merger) are Storage-grid buildings too, so their handful of
+  slots is reachable at the same ring — consistent, and harmless.
+
+Verified headlessly: at 150 u the card offers Quick Sort (not Travel here), stacks drag, and
+a 50-ore take/put round-trips through the store; at 330 u the transfer is still refused, and
+Dismantle stays disabled at 150 u.
+
+## [0.52.11] — A machine's card opens from across the yard
+
+![The smelter's action card open from 150 units away, offering Travel here instead of hands-on controls](docs/images/changelog/0.52.11-open-at-range.png)
+
+Tapping a building, deposit, or the HUB used to open its action card only at arm's length
+(`INTERACT_RADIUS`, 15 u) — from any further the tap just walked you over, and you couldn't
+so much as look at a recipe without making the trip. Now the card **opens anywhere inside a
+new `NODE_OPEN_RADIUS` ring (240 u, `BUILD_RADIUS`' tier)**: looking is not touching.
+
+- **Every action inside the card still gates on real reach** — out of it the buttons disable
+  and the card offers **Travel here · Nm**, exactly as the Sources/Buildings panels already
+  did for far machines. Nothing hands-on got any longer arms, and the store re-checks reach
+  on every action regardless.
+- **Opening no longer requires standing still**: the new `playerCanOpen` measures from the
+  live walk position instead of refusing during travel, so you can read a card while heading
+  over (its buttons enable on arrival) — and the card closes itself only once you actually
+  move out of the ring.
+- Beyond the ring, a tap falls through to walking toward the node, unchanged.
+
+Verified headlessly: at 150 u the card opens with Travel here and no accidental walk; at
+330 u the popover stays shut and the tap walks the avatar over.
+
+## [0.52.10] — Belts and powerlines lay on the pick — no confirm popover
+
+![Belt mode: an invalid destination pick places nothing and the coach line explains why, in amber](docs/images/changelog/0.52.10-instant-lay.png)
+
+Picking a belt's destination (or a powerline's second node) used to open a cost popover
+with a Connect button — one more click on every single run, in the game's most repeated
+loop. That step is gone: **the second pick commits on the spot**, paying the plan's cost
+immediately.
+
+- **Nothing is placed when the conditions aren't met.** If the plan fails (input/output
+  already taken, not a valid endpoint, too far, can't afford, another run still laying),
+  the pick is refused and the belt/power coach line explains why, transiently, in amber —
+  the armed route stays up so you can re-aim. The will-clog warning ("that recipe won't
+  use this") still shows after the belt lays; it never blocked, and still doesn't.
+- **Picking two already-connected grid nodes now tears the chain down immediately** (with
+  the refund fly-back). That path lived in the same popover; teardown is confirmless
+  everywhere else — tapping a wire, disassemble mode — so it is here too.
+- A belt draft can no longer exist with a destination picked-but-unconfirmed, so the
+  ghost-seating preview (`draftSeatState`) drops its `to` parameter, and the popover's
+  strings, styles, and Escape/selector plumbing are removed.
+
+Verified headlessly on the stress world (Edge + `window.__game`): an invalid destination
+pick leaves the belt count unchanged and shows the note; a valid pick starts the lay with
+no dialog in the DOM; a cut powerline re-lays from two node clicks; a connected pair pick
+drops the whole chain — refunds landing back in the inventory throughout.
+
+## [0.52.9] — The belt ghost shows the seating the commit will actually produce
+
+![Drafting a second belt from a splitter: the ghost leaves the north port while the existing belt has already re-seated onto the south port in the preview](docs/images/changelog/0.52.9-seating-preview.png)
+
+Drawing a second belt out of a splitter could commit something visibly different from the
+ghost: the draft drew itself from the side's **free** port, but committing re-scores every
+belt on that side together (`beltPortAssignments` is a global best-fit — the belt heading
+north takes the north flank), so the new belt could land on the *other* port and evict the
+existing belt to the one the ghost had just vacated. Result: the ghost promised one route,
+and the commit reshuffled both belts into different ones.
+
+The preview now runs the same math the commit does. The draft is seated into a preview state
+as the laying belt (`draftSeatState` — the assignment already counts a laying belt as an
+occupant), and both halves of the picture read from it:
+
+- **The ghost** asks that assignment for its own port (`draftAssignedPort`), so it hops
+  between flanks as you aim and always leaves from the port the committed belt will get.
+- **The committed belts** are drawn from the same preview state on the flow canvas, so a
+  neighbour that will be re-seated by the commit visibly slides to its new port *while you
+  aim* — the commit then changes nothing on screen.
+
+A real lay in progress keeps its claim (the preview never overrides `beltBuild`), and the
+planners still validate against the real state, so nothing counts the draft against itself.
+
+## [0.52.8] — A junction's split belts rejoin their corridor without doubling back
+
+![A splitter dropped on a smelter→storage belt: the incoming belt enters the west port straight, the outgoing belt leaves the north flank and turns once into the storage's input](docs/images/changelog/0.52.8-splitter-corridor-route.png)
+
+Dropping a splitter onto a belt could leave the outgoing half drawing a broken-looking route:
+out of the flank port, down onto a dangling stub with a bend dot at its tip, then straight back
+up the same column toward the destination — a hairpin fold over the junction.
+
+The cause was 0.52.5's corridor pin: the split stored an auto-waypoint **on the corridor row**
+(the line through the junction's center), but the rendered route leaves from a **flank nub**
+sitting off that row — so whenever the far machine was on the nub's side, the route dipped to
+touch the pin and folded straight back. The pin also degraded flank choice: the heading toward
+it runs dead along the corridor, making north-vs-south a coin flip.
+
+Rejoining the corridor is render geometry, and now lives in the renderer:
+
+- **`splitBeltAt` no longer stores pins** — only the player's own bends partition onto the halves.
+- **Flank ports jog instead of beelining** (`beltRenderAnchors`): when a route continues where a
+  flank port doesn't point, it steps sideways along the nub row toward its target to clear the
+  disc — and only drops onto the corridor row when it actually keeps riding that corridor (a
+  straight-through split now hugs the exact line the player drew, beside the junction; a turning
+  one climbs once, with no fold).
+- **Port assignment aims true**: with no pin hijacking the heading, the belt toward the upper
+  machine takes the north flank and one toward the lower takes the south.
+- **Old saves heal on load**: zero-turn auto-pins stored by 0.52.5–0.52.7 are pruned when a save
+  is read (a real player bend is always a corner of the baked path, so it survives).
+
 ## [0.52.7] — No phantom junctions on a split belt, and no dead-end port stubs
 
 ![A split belt at close zoom: small bend dots, the north-port belt elbowing cleanly into its diagonal, the south-port belt routing under and up](docs/images/changelog/0.52.7-split-clean-zoom.png)
