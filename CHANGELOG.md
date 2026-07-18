@@ -18,6 +18,76 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.55.0] — Vision Upgrade: research your way to an 800 m card-open ring
+
+A second root in the **Player Upgrades** tech tree: **Vision Upgrade** (20 copper
+ingots, 40 wire, 10 cable) widens the card-open ring from the stock 500 m to
+**800 m** — open a machine's action card, and see its eye badge light up, from
+across the valley. It hangs off nothing (legs and eyes are separate gear), so it's
+researchable the moment the Research Facility is up.
+
+Under the hood it's the tech tree working as designed: a new declarative effect
+kind, `nodeOpenRadius`, folded on read in the engine's new `nodeOpenRadius()` (a
+max over researched effects — better optics supersede the stock ones, they don't
+stack), which `playerCanOpen` now reads instead of the raw constant. The MapView
+eye badge and the card gate both sit on that one predicate, so they follow the
+upgrade for free and can't disagree. French copy added for the whole player tree
+while at it (it was falling back to English; the logistics tree was already
+translated).
+
+Verified headlessly on the stress world, driving the real engine against live
+state: stock, a machine at 530 m can't open (225 m can); with the research banked
+the ring reports 800 and the 530 m machine opens, while 995 m still refuses.
+
+![The Player Upgrades tab with the new Vision Upgrade node, a second root below the Leg Exoskeleton](docs/images/changelog/0.55.0-vision-upgrade.png)
+
+## [0.54.3] — The card-open ring is 500 m, and the eye badge tells the truth again
+
+0.54.2 let a node's card open from *any* distance, which overshot: reading a machine
+4 km away isn't gameplay, and the eye badge on markers still reported the old 240 u
+ring, so the cue and the rule disagreed. Opening is ring-gated again, but the ring is
+now **500 m** (`NODE_OPEN_RADIUS`) instead of 240 — wide enough to inspect the whole
+neighbourhood from a zoomed-out view, and the badge follows it automatically since
+both read the same predicate. Beyond the ring a node tap walks you toward it, as
+before. Storage kept its own hands-on tier: transfers still work only within the old
+240 u (`STORAGE_REACH_RADIUS`, `BUILD_RADIUS`' tier) — swapping stacks with a crate
+half a kilometre away is not "close enough to look". Out-of-ring distance closes an
+open card again too.
+
+Verified headlessly on the stress world: a constructor at 465 m shows the eye badge
+and opens its card; one at 602 m shows no badge, opens nothing, and the tap starts
+the walk.
+
+![A constructor's card open from 465 m out, eye badges marking the 500 m ring](docs/images/changelog/0.54.3-open-ring-500.png)
+
+## [0.54.2] — A machine's card opens from any distance
+
+Tapping a building, deposit or the HUB on the map now opens its action card no matter
+how far away the avatar stands — before, a tap beyond the ~240 u "open" ring silently
+walked you there instead, which made a zoomed-out factory impossible to inspect: every
+click was a march order. The card was always built for this — every control inside it
+re-checks real reach and offers "Travel here · Xm" when you're too far to touch, storage
+transfers still need the in-sight ring, dismantling still needs working reach — so the
+distance gate on merely *opening* it was the one thing standing between the player and
+reading their factory from altitude. Walking is now what terrain taps (and the card's
+travel button) do; a tap on a node means "show me this". The card also no longer
+auto-closes when you walk out of range, since range no longer owns it.
+
+Verified headlessly on the stress world: from a survey zoom, a tap on a storage sitting
+4 524 m from the avatar opens its card, offers the travel button, and refuses the
+dismantle.
+
+![The card of a storage 4.5 km away, open from a survey zoom](docs/images/changelog/0.54.2-far-node-card.png)
+
+## [0.54.1] — The demo deploy no longer ships session scratch files
+
+The 0.54.0 demo deploy swept a `zztmp-*.html` file — a session's temporary headless
+test driver, sitting in `public/` — into the public demo repo, because Vite copies
+`public/` into `dist/` verbatim and the deploy mirrors `dist/`. The mirror step in
+`scripts/deploy-demo.mjs` now filters out `zztmp-*` names, and since every deploy
+wipes the publish dir first, re-deploying also scrubbed the leaked file from the
+public repo. Tooling only; nothing in-game changed.
+
 ## [0.54.0] — A loading screen holds the door while a save comes up
 
 ![The loading screen: the Aphelion logo over an opaque dark cover, with LOADING and an orange bar mid-sweep](docs/images/changelog/0.54.0-loading-screen.png)
