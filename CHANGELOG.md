@@ -18,6 +18,30 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.56.0] — The Bonder: two streams in, one composite out, behind a new Assembly tree
+
+A third tech tree, **Assembly** ("join the flows"), whose root unlocks the **Bonder** —
+the first belt-capable machine that eats from TWO input lines at once: two input ports
+(both on the west face), one output, 10 kW, 6 s per cycle. Its first recipe winds
+4 wire around an iron rod core into a **Coil** (new item, with its own icon) — the
+canonical two-input bond: one part from the iron line, one from the copper line,
+meeting for the first time. Nothing consumes coils yet; they're the raw material of
+the electric machines to come.
+
+No engine changes were needed, which is the point of the content-driven design: the
+Equipment Workshop already proved multi-input recipes, the merger already proved
+multi-belt delivery, and `unlockBuilding` already carries tech gating — the Bonder
+is the first machine to sit at the intersection (a powered, belt-fed, two-input
+processor), and it's pure `content.ts` plus a glyph.
+
+Verified headlessly on the stress world through the real store and engine: the
+build gate flips only when the tech is researched; a placed Bonder over a 30 s
+simulate turns 5 rods + 20 wire into exactly 5 coils; starved of rods it produces
+nothing and leaves the wire untouched (no one-input cheating); and `portsForDef`
+reports input-w ×2 / output-e.
+
+![The Assembly tech tab with the Bonder node](docs/images/changelog/0.56.0-bonder-assembly.png)
+
 ## [0.55.0] — Vision Upgrade: research your way to an 800 m card-open ring
 
 A second root in the **Player Upgrades** tech tree: **Vision Upgrade** (20 copper
