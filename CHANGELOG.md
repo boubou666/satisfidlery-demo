@@ -18,6 +18,49 @@ before this file is in the git log.
 
 _Nothing yet._
 
+## [0.58.0] — The Leaf Collector: foraging, automated, behind a new Miscellaneous tech tree
+
+The tech web grows a fourth tab — **Miscellaneous**, "the odd jobs: machines
+and gadgets that fit no other program" — and its root node unlocks the game's
+first automated harvester that feeds on the living map rather than an ore node:
+
+- **Leaf Collector** (new building, new icon) — a powered picker with **no
+  inputs and no recipes**: wire it to a live grid and it strips the leaf
+  patches within 450 m of it, one whole leaf every 2 s, into its output
+  buffer. One output port, so the harvest belts away like any machine's
+  product — or Collect it by hand at the card.
+- **The land is the input.** It drains the *same* regrowing patches the player
+  forages, so once the standing crop is stripped its sustained rate is
+  whatever the patches in reach grow back (~1 leaf per 4 s in deep forest,
+  a trickle on a plain) — where you plant it is the whole decision.
+- **Honest power draw.** With nothing ripe in reach (or its output full) it
+  idles at **zero kW**, exactly like a processor out of inputs; its card reads
+  the standing crop ("N leaves ripe within reach") so you can see why.
+- Under the hood, the pick is computed once per tick as a shared **harvest
+  plan** read from both sides of the tick merge: `simulate()` credits the
+  collector (it owns `buildings`) and `simulateForage()` drains the patches
+  (it owns `leafPatches`), so the leaf credited and the leaf stripped are
+  always the same leaf — and a long backgrounded-tab tick harvests what the
+  patches actually grew, not just the standing crop.
+
+![A powered Leaf Collector's card: 20 leaves buffered, the local patches stripped bare, drawing 0 kW while it waits for regrowth](docs/images/changelog/0.58.0-leaf-collector.png)
+
+![The Tech Tree's new Miscellaneous tab with the Leaf Collector node](docs/images/changelog/0.58.0-misc-tech-tree.png)
+
+## [0.57.1] — The product dropdown becomes chips: every recipe on the card, icon and all
+
+The building card's Product picker was the last native `<select>` in the game —
+CSS could dress the closed field, but the OS drew the open option list: plain
+text, no item icons, styled like a web form. It's now a row of **chips**, one
+per unlocked recipe, each carrying the output item's icon and name with the
+active one lit (its border takes the item's color) — the FuelPicker's pattern,
+now shared by the two pickers a card can show. Every choice is visible at once
+instead of hiding behind a click, and re-clicking the active chip is inert, so
+you can't reset a cycle in progress by picking what's already picked. Both hosts
+of the shared card get it: the map's node popover and the Buildings panel.
+
+![A Constructor's card with all seven recipes as icon chips](docs/images/changelog/0.57.1-recipe-chips.png)
+
 ## [0.57.0] — Screws and the Bolted Plate: the Bonder gets a chain of its own
 
 The Bonder's recipe is no longer a borrowed one. Two new items give it a chain
